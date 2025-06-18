@@ -953,6 +953,7 @@ WARGVISRCAB010,Vistamar,Vistamar Reserva,-,Cabernet Sauvignon,Central Valley,750
                         size: wine["Size"],
                         price: priceValue,
                         image: imageUrl,
+                        grapeVariety: wine["Grape Variety"], // Store grape variety
                         description: "", // No description in CSV
                         pairings: "" // No pairings in CSV
                     });
@@ -1004,10 +1005,11 @@ WARGVISRCAB010,Vistamar,Vistamar Reserva,-,Cabernet Sauvignon,Central Valley,750
                         p.brand.toLowerCase().includes(searchTerm) ||
                         p.type.toLowerCase().includes(searchTerm) ||
                         p.country.toLowerCase().includes(searchTerm) ||
-                        p.vintage.toLowerCase().includes(searchTerm) ||
+                        // Removed vintage from search filter
                         p.region.toLowerCase().includes(searchTerm) ||
                         p.size.toLowerCase().includes(searchTerm) ||
-                        p.id.toLowerCase().includes(searchTerm)
+                        p.id.toLowerCase().includes(searchTerm) ||
+                        p.grapeVariety.toLowerCase().includes(searchTerm) // Include grape variety in search
                     );
                 }
 
@@ -1023,7 +1025,7 @@ WARGVISRCAB010,Vistamar,Vistamar Reserva,-,Cabernet Sauvignon,Central Valley,750
                         <img src="${product.image}" alt="${product.name}" onerror="this.onerror=null;this.src='https://placehold.co/150x200/cccccc/333333?text=No+Image';" class="product-image">
                         <h3 class="text-xl font-semibold">${product.name}</h3>
                         <p class="text-gray-600">${product.country} - ${product.type}</p>
-                        <p class="text-gray-500 text-sm">Brand: ${product.brand} | Vintage: ${product.vintage || 'N/A'}</p>
+                        <p class="text-gray-500 text-sm">Grape: ${product.grapeVariety || 'N/A'}</p>
                         <p class="price">FJ$${product.price.toFixed(2)}</p>
                         <div class="quantity-control">
                             <button class="decrease-quantity" data-product-id="${product.id}">-</button>
