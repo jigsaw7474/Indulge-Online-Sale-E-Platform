@@ -802,22 +802,29 @@
 
             let products = []; // This will hold the parsed wine data
 
-            // CSV data for Chile and South Africa
+            // --- START: Wine Product Image Map ---
+            // You can add your product image URLs here.
+            // Use the "Product Code" from the CSV as the key.
+            // Example: "WSAW 2023 OLDCHD": "https://your-image-host.com/path/to/oldenburg_chardonnay.jpg",
+            const productImageMap = {
+                "WARGMAECHD010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Chardonnay.png?raw=true",
+                "WARGMAESBL010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Sauvignon%20Blanc.png?raw=true",
+                "WARGMAECAR010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Carm%C3%A9n%C3%A8re.png?raw=true",
+                "WARGMAEMER010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Merlot.png?raw=true",
+                "WARGVIBCHD010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Chardonnay.png?raw=true",
+                "WARGVIBSBL010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Sauvignon%20Blanc.png?raw=true",
+                "WARGVIBCAR010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Carm%C3%A9n%C3%A8re.png?raw=true",
+                "WARGVIBMER010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Merlot.png?raw=true",
+                "WARGVIBCAB010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Cabernet%20Sauvignon.png?raw=true",
+                "WARGVISRMLB010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Reserva%20Malbec.png?raw=true",
+                "WARGVISRPN010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Reserva%20Pinot%20Noir.png?raw=true",
+                "WARGVISRCAB010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Reserva%20Cabernet%20Sauvignon.png?raw=true"
+            };
+            // --- END: Wine Product Image Map ---
+
+
+            // CSV data for Chile (South Africa removed)
             const csvData = {
-                "South Africa.csv": `Code,Brand,Wine Name,Vintage,Grape Variety,Region,Size,Indulge Unit RP (VIP)
-WSAW 2023 OLDCHD,Oldenburg Vineyards,Oldenburg Vineyards Chardonnay,2023,Chardonnay,Stellenbosch,750 ml,110
-WSAW 2023 OLDCHN,Oldenburg Vineyards,Oldenburg Vineyards Chenin Blanc,2023,Chenin Blanc,Stellenbosch,750 ml,110
-WSAW 2023 OLDCLW,Oldenburg Vineyards,Oldenburg Vineyards <CL° White Blend,2023,White Blend,Stellenbosch,750 ml,55
-WSAR 2019 OLDCAB,Oldenburg Vineyards,Oldenburg Vineyards Cabernet Sauvignon,2019,Cabernet Sauvignon,Stellenbosch,750 ml,130
-WSAR 2020 OLDFRC,Oldenburg Vineyards,Oldenburg Vineyards Cabernet Franc,2020,Cabernet Franc,Stellenbosch,750 ml,130
-WSAR 2021 OLDGRN,Oldenburg Vineyards,Oldenburg Vineyards Grenache Noir,2021,Grenache Noir,Stellenbosch,750 ml,130
-WSAR 2019 OLDMER,Oldenburg Vineyards,Oldenburg Vineyards Merlot,2019,Merlot,Stellenbosch,750 ml,95
-WSAR 2019 OLDSYR,Oldenburg Vineyards,Oldenburg Vineyards Syrah,2019,Syrah,Stellenbosch,750 ml,110
-WSAR 2021 OLDCLR,Oldenburg Vineyards,Oldenburg Vineyards <CL° Red Blend,2021,Red Blend,Stellenbosch,750 ml,55
-WSAR 2021 RONPER,Oldenburg Vineyards,Oldenburg Vineyards Rondekop Per Se Cabernet Sauvignon,2021,Cabernet Sauvignon,Stellenbosch,750 ml,225
-WSAR 2021 RONRHD,Oldenburg Vineyards,Oldenburg Vineyards Rondekop Rhodium Blend,2021,Red Blend,Stellenbosch,750 ml,225
-WSAR 2021 RONSTN,Oldenburg Vineyards,Oldenburg Vineyards Rondekop Stone Axe Blend,2021,Red Blend,Stellenbosch,750 ml,190
-`,
                 "Chile.csv": `Code,Brand,Wine Name,Vintage,Grape Variety,Region,Size,Indulge Unit RP (VIP)
 WARGMAECHD010,Mancura,Mancura Etnia,2022,Chardonnay,Central Valley,750 ml,23
 WARGMAESBL010,Mancura,Mancura Etnia,2022,Sauvignon Blanc,Central Valley,750 ml,23
@@ -918,18 +925,22 @@ WARGVISRCAB010,Vistamar,Vistamar Reserva,-,Cabernet Sauvignon,Central Valley,750
                     }
 
                     const wineType = inferWineType(wine["Grape Variety"], wine["Wine Name"]);
-                    let imageUrl = `https://placehold.co/150x200/cccccc/333333?text=No+Image`; // Default placeholder
+                    // Use the image from the map, or a type-specific placeholder if not found
+                    let imageUrl = productImageMap[wine["Code"]] || `https://placehold.co/150x200/cccccc/333333?text=No+Image`;
 
-                    // Assign placeholder image based on inferred type
-                    if (wineType === "Red Wine") {
-                        imageUrl = "https://placehold.co/150x200/8B0000/FFFFFF?text=Red+Wine"; // Dark Red
-                    } else if (wineType === "White Wine") {
-                        imageUrl = "https://placehold.co/150x200/FFD700/000000?text=White+Wine"; // Gold
-                    } else if (wineType === "Rosé") {
-                        imageUrl = "https://placehold.co/150x200/FF69B4/000000?text=Ros%C3%A9+Wine"; // Hot Pink
-                    } else if (wineType === "Sparkling") {
-                        imageUrl = "https://placehold.co/150x200/ADD8E6/000000?text=Sparkling+Wine"; // Light Blue
+                    // Assign placeholder image based on inferred type if no specific image is provided
+                    if (!productImageMap[wine["Code"]]) { // Only assign type-specific placeholder if no explicit image
+                        if (wineType === "Red Wine") {
+                            imageUrl = "https://placehold.co/150x200/8B0000/FFFFFF?text=Red+Wine"; // Dark Red
+                        } else if (wineType === "White Wine") {
+                            imageUrl = "https://placehold.co/150x200/FFD700/000000?text=White+Wine"; // Gold
+                        } else if (wineType === "Rosé") {
+                            imageUrl = "https://placehold.co/150x200/FF69B4/000000?text=Ros%C3%A9+Wine"; // Hot Pink
+                        } else if (wineType === "Sparkling") {
+                            imageUrl = "https://placehold.co/150x200/ADD8E6/000000?text=Sparkling+Wine"; // Light Blue
+                        }
                     }
+
 
                     products.push({
                         id: wine["Code"],
