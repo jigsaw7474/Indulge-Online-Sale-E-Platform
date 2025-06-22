@@ -770,14 +770,20 @@
             <p id="emptyCartMessage" class="text-center text-gray-600">Your cart is empty. Add some wines!</p>
             <div id="cartSummary" class="cart-summary">
                 <span>Total Bottles: <span id="totalBottles">0</span></span>
-                <span>Total Price: FJ$<span id="totalPrice">0.00</span></span>
                 <span class="text-red-600 font-bold">Total Discount: -FJ$<span id="totalDiscount">0.00</span></span>
+                <span>Subtotal: FJ$<span id="subTotalPrice">0.00</span></span>
+                <span id="deliveryFeeContainer">Delivery Fee: FJ$<span id="deliveryFee">0.00</span></span>
+                <span class="font-bold border-t-2 border-purple-300 pt-2 mt-2">Grand Total: FJ$<span id="grandTotalPrice">0.00</span></span>
             </div>
-            <!-- New text for delivery information -->
-            <p class="text-center text-gray-600 mt-4">Free Deliveries every Thursday, Suva CBD.</p>
+            <!-- UPDATED text for delivery information -->
+            <div class="text-center text-gray-600 mt-4 text-sm leading-relaxed">
+                <p><span class="font-bold text-green-600">Enjoy FREE delivery</span> for orders over FJ$60.00!</p>
+                <p>Deliveries are done every Wednesday, for Suva CBD only.</p>
+                <p>A FJ$5.00 delivery fee applies for orders below FJ$60.00.</p>
+            </div>
             <div class="cart-actions">
                 <button id="placeOrderButton" class="place-order-button" disabled>
-                    Place Order (Min. 6 Bottles)
+                    Place Order
                 </button>
             </div>
         </div>
@@ -834,10 +840,12 @@
                     </table>
                 </div>
 
-                <div class="order-summary-totals">
+                <div id="orderSummaryTotals" class="order-summary-totals">
                     <div>Total Bottles: <span id="finalTotalBottles">0</span></div>
                     <div class="text-red-600">Total Discount: -FJ$<span id="finalTotalDiscount">0.00</span></div>
-                    <div>Total Price: FJ$<span id="finalTotalPrice">0.00</span></div>
+                    <div>Subtotal: FJ$<span id="finalSubTotalPrice">0.00</span></div>
+                    <div>Delivery Fee: FJ$<span id="finalDeliveryFee">0.00</span></div>
+                    <div class="font-bold border-t-2 border-purple-300 pt-2 mt-2">Grand Total: FJ$<span id="finalGrandTotalPrice">0.00</span></div>
                 </div>
 
                 <p class="order-thank-you">Thank you for your order with Indulge Wine Club! We will contact you shortly to confirm delivery details.</p>
@@ -865,17 +873,21 @@
             const cartItemsContainer = document.getElementById('cartItemsContainer');
             const cartItemCountSpan = document.getElementById('cartItemCount');
             const totalBottlesSpan = document.getElementById('totalBottles');
-            const totalPriceSpan = document.getElementById('totalPrice');
+            const subTotalPriceSpan = document.getElementById('subTotalPrice');
             const totalDiscountSpan = document.getElementById('totalDiscount');
+            const deliveryFeeSpan = document.getElementById('deliveryFee');
+            const grandTotalPriceSpan = document.getElementById('grandTotalPrice');
             const placeOrderButton = document.getElementById('placeOrderButton');
             const emptyCartMessage = document.getElementById('emptyCartMessage');
-
+            
             const orderConfirmationSection = document.getElementById('orderConfirmation');
             const orderDateSpan = document.getElementById('orderDate');
             const orderItemsTableBody = document.getElementById('orderItemsTableBody');
             const finalTotalBottlesSpan = document.getElementById('finalTotalBottles');
-            const finalTotalPriceSpan = document.getElementById('finalTotalPrice');
+            const finalSubTotalPriceSpan = document.getElementById('finalSubTotalPrice');
             const finalTotalDiscountSpan = document.getElementById('finalTotalDiscount');
+            const finalDeliveryFeeSpan = document.getElementById('finalDeliveryFee');
+            const finalGrandTotalPriceSpan = document.getElementById('finalGrandTotalPrice');
 
             const customerNameInput = document.getElementById('customerName');
             const customerCompanyInput = document.getElementById('customerCompany');
@@ -1407,7 +1419,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                         p.brand.toLowerCase().includes(vinoSaleSearchTerm) ||
                         p.type.toLowerCase().includes(vinoSaleSearchTerm) ||
                         p.country.toLowerCase().includes(vinoSaleSearchTerm) ||
-                        p.grapeVariety.toLowerCase().includes(vinoSaleSearchTerm) ||
+                        p.grapeVariety.toLowerCase().includes(searchTerm) ||
                         p.id.toLowerCase().includes(vinoSaleSearchTerm)
                     );
                 }
@@ -1492,7 +1504,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
             function updateCartDisplay() {
                 cartItemsContainer.innerHTML = ''; // Clear previous content
                 let totalBottles = 0;
-                let totalPrice = 0;
+                let subTotal = 0;
                 let totalDiscount = 0;
                 let cartIsEmpty = true;
 
@@ -1507,7 +1519,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                         totalBottles += item.quantity;
                         
                         const itemPriceAfterDiscount = calculateItemPrice(item.product, item.quantity);
-                        totalPrice += itemPriceAfterDiscount;
+                        subTotal += itemPriceAfterDiscount;
 
                         const itemDiscount = calculateItemDiscount(item.product, item.quantity);
                         totalDiscount += itemDiscount;
@@ -1596,11 +1608,17 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                     }
                 }
                 
-                totalBottlesSpan.textContent = totalBottles;
-                totalPriceSpan.textContent = totalPrice.toFixed(2);
-                totalDiscountSpan.textContent = totalDiscount.toFixed(2); // Update total discount
+                const deliveryFee = (subTotal > 0 && subTotal < 60) ? 5.00 : 0.00;
+                const grandTotal = subTotal + deliveryFee;
 
-                if (totalBottles >= 6) {
+                totalBottlesSpan.textContent = totalBottles;
+                subTotalPriceSpan.textContent = subTotal.toFixed(2);
+                totalDiscountSpan.textContent = totalDiscount.toFixed(2);
+                deliveryFeeSpan.textContent = deliveryFee.toFixed(2);
+                grandTotalPriceSpan.textContent = grandTotal.toFixed(2);
+
+
+                if (totalBottles >= 1) {
                     placeOrderButton.disabled = false;
                 } else {
                     placeOrderButton.disabled = true;
@@ -1709,7 +1727,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 orderItemsTableBody.innerHTML = '';
 
                 let totalItems = 0;
-                let totalPrice = 0;
+                let subTotal = 0;
                 let totalDiscount = 0;
 
                 const specialOrderItems = [];
@@ -1732,11 +1750,11 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                     specialsHeaderRow.innerHTML = '<th colspan="5" class="text-left py-2 bg-purple-100 text-purple-800">Monthly Wine Specials</th>';
                     orderItemsTableBody.appendChild(specialsHeaderRow);
                     specialOrderItems.forEach(item => {
-                        const subtotal = calculateItemPrice(item.product, item.quantity);
+                        const subtotalPrice = calculateItemPrice(item.product, item.quantity);
                         const itemDiscount = calculateItemDiscount(item.product, item.quantity);
 
                         totalItems += item.quantity;
-                        totalPrice += subtotal;
+                        subTotal += subtotalPrice;
                         totalDiscount += itemDiscount;
 
                         const row = document.createElement('tr');
@@ -1745,7 +1763,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                             <td class="text-right">${item.quantity}</td>
                             <td class="text-right">FJ$${item.product.price.toFixed(2)}</td>
                             <td class="text-right text-red-600">${itemDiscount > 0 ? `-FJ$${itemDiscount.toFixed(2)}` : 'FJ$0.00'}</td>
-                            <td class="text-right">FJ$${subtotal.toFixed(2)}</td>
+                            <td class="text-right">FJ$${subtotalPrice.toFixed(2)}</td>
                         `;
                         orderItemsTableBody.appendChild(row);
                     });
@@ -1757,11 +1775,11 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                     vinoSaleHeaderRow.innerHTML = '<th colspan="5" class="text-left py-2 bg-red-100 text-red-800">Vino Sale Items</th>';
                     orderItemsTableBody.appendChild(vinoSaleHeaderRow);
                     vinoSaleOrderItems.forEach(item => {
-                        const subtotal = calculateItemPrice(item.product, item.quantity);
+                        const subtotalPrice = calculateItemPrice(item.product, item.quantity);
                         const itemDiscount = calculateItemDiscount(item.product, item.quantity);
 
                         totalItems += item.quantity;
-                        totalPrice += subtotal;
+                        subTotal += subtotalPrice;
                         totalDiscount += itemDiscount;
 
                         const row = document.createElement('tr');
@@ -1770,15 +1788,20 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                             <td class="text-right">${item.quantity}</td>
                             <td class="text-right">FJ$${item.product.price.toFixed(2)}</td>
                             <td class="text-right text-red-600">${itemDiscount > 0 ? `-FJ$${itemDiscount.toFixed(2)}` : 'FJ$0.00'}</td>
-                            <td class="text-right">FJ$${subtotal.toFixed(2)}</td>
+                            <td class="text-right">FJ$${subtotalPrice.toFixed(2)}</td>
                         `;
                         orderItemsTableBody.appendChild(row);
                     });
                 }
 
+                const deliveryFee = (subTotal > 0 && subTotal < 60) ? 5.00 : 0.00;
+                const grandTotal = subTotal + deliveryFee;
+
                 finalTotalBottlesSpan.textContent = totalItems;
-                finalTotalPriceSpan.textContent = totalPrice.toFixed(2);
+                finalSubTotalPriceSpan.textContent = subTotal.toFixed(2);
                 finalTotalDiscountSpan.textContent = totalDiscount.toFixed(2);
+                finalDeliveryFeeSpan.textContent = deliveryFee.toFixed(2);
+                finalGrandTotalPriceSpan.textContent = grandTotal.toFixed(2);
             }
 
             // Function to generate order summary text for email (plain text format)
@@ -1804,7 +1827,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 }
 
                 let totalItems = 0;
-                let totalPrice = 0;
+                let subTotal = 0;
                 let totalDiscount = 0;
 
                 const specialOrderItems = [];
@@ -1826,12 +1849,12 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 if (specialOrderItems.length > 0) {
                     orderSummary += "\n--- Monthly Wine Specials ---\n";
                     specialOrderItems.forEach(item => {
-                        const subtotal = calculateItemPrice(item.product, item.quantity);
+                        const subtotalPrice = calculateItemPrice(item.product, item.quantity);
                         const itemDiscount = calculateItemDiscount(item.product, item.quantity);
                         totalItems += item.quantity;
-                        totalPrice += subtotal;
+                        subTotal += subtotalPrice;
                         totalDiscount += itemDiscount;
-                        orderSummary += `- ${item.product.name} (${item.product.brand}, ${item.product.grapeVariety || 'N/A'}) - Qty: ${item.quantity}, Subtotal: FJ$${subtotal.toFixed(2)}`;
+                        orderSummary += `- ${item.product.name} (${item.product.brand}, ${item.product.grapeVariety || 'N/A'}) - Qty: ${item.quantity}, Subtotal: FJ$${subtotalPrice.toFixed(2)}`;
                         if (itemDiscount > 0) {
                             orderSummary += ` (Discount: -FJ$${itemDiscount.toFixed(2)})`;
                         }
@@ -1842,12 +1865,12 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 if (vinoSaleOrderItems.length > 0) {
                     orderSummary += "\n--- Vino Sale Items ---\n";
                     vinoSaleOrderItems.forEach(item => {
-                        const subtotal = calculateItemPrice(item.product, item.quantity);
+                        const subtotalPrice = calculateItemPrice(item.product, item.quantity);
                         const itemDiscount = calculateItemDiscount(item.product, item.quantity);
                         totalItems += item.quantity;
-                        totalPrice += subtotal;
+                        subTotal += subtotalPrice;
                         totalDiscount += itemDiscount;
-                        orderSummary += `- ${item.product.name} (${item.product.brand}, ${item.product.grapeVariety || 'N/A'}) - Qty: ${item.quantity}, Subtotal: FJ$${subtotal.toFixed(2)}`;
+                        orderSummary += `- ${item.product.name} (${item.product.brand}, ${item.product.grapeVariety || 'N/A'}) - Qty: ${item.quantity}, Subtotal: FJ$${subtotalPrice.toFixed(2)}`;
                         if (itemDiscount > 0) {
                             orderSummary += ` (Discount: -FJ$${itemDiscount.toFixed(2)})`;
                         }
@@ -1855,10 +1878,15 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                     });
                 }
                 
+                const deliveryFee = (subTotal > 0 && subTotal < 60) ? 5.00 : 0.00;
+                const grandTotal = subTotal + deliveryFee;
+
                 orderSummary += "\n";
                 orderSummary += `Total Bottles: ${totalItems}\n`;
                 orderSummary += `Total Discount: -FJ$${totalDiscount.toFixed(2)}\n`;
-                orderSummary += `Total Price: FJ$${totalPrice.toFixed(2)}\n\n`;
+                orderSummary += `Subtotal: FJ$${subTotal.toFixed(2)}\n`;
+                orderSummary += `Delivery Fee: FJ$${deliveryFee.toFixed(2)}\n`;
+                orderSummary += `Grand Total: FJ$${grandTotal.toFixed(2)}\n\n`;
                 
                 return orderSummary;
             }
