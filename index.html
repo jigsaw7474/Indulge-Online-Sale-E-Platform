@@ -449,7 +449,8 @@
         }
 
         .order-customer-details input,
-        .order-customer-details textarea {
+        .order-customer-details textarea,
+        .order-customer-details select {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid #d1d5db;
@@ -461,11 +462,18 @@
         }
 
         .order-customer-details input:focus,
-        .order-customer-details textarea:focus {
+        .order-customer-details textarea:focus,
+        .order-customer-details select:focus {
             outline: none;
             border-color: #8b5cf6;
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
         }
+        
+        .order-customer-details input:required:invalid,
+        .order-customer-details textarea:required:invalid {
+             border-color: #ef4444; /* Red border for invalid required fields */
+        }
+
 
         .order-customer-details textarea {
             min-height: 80px;
@@ -534,6 +542,18 @@
             margin-top: 2rem;
             font-style: italic;
         }
+        
+        #order-form-error {
+            color: #dc2626; /* Red for error message */
+            background-color: #fee2e2; /* Light red background */
+            border: 1px solid #fca5a5; /* Red border */
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 1.5rem;
+            display: none; /* Hidden by default */
+        }
+
 
         .order-button-group {
             display: flex;
@@ -692,7 +712,7 @@
         <div class="header">
             <div class="main-title-group">
                 <!-- Logo with updated source and proper styling -->
-                <img src="https://github.com/jigsaw7474/Indulge-Online-Sale-E-Platform/blob/main/Indulge%20Logo.png?raw=true" alt="Indulge Wine Club Logo" class="logo">
+                <img src="https://github.com/jigsaw7474/Coffee-Warehouse-3D/blob/main/MAKE%20IT%20WONDERFUL.png?raw=true" alt="Indulge Wine Club Logo" class="logo">
                 <h1>Indulge Wine Club</h1>
             </div>
         </div>
@@ -778,7 +798,7 @@
             <!-- UPDATED text for delivery information -->
             <div class="text-center text-gray-600 mt-4 text-sm leading-relaxed">
                 <p><span class="font-bold text-green-600">Enjoy FREE delivery</span> for orders over FJ$60.00!</p>
-                <p>Deliveries are done every Friday, for Suva CBD only.</p>
+                <p>Deliveries are done every Wednesday, for Suva CBD only.</p>
                 <p>A FJ$5.00 delivery fee applies for orders below FJ$60.00.</p>
             </div>
             <div class="cart-actions">
@@ -798,28 +818,38 @@
                 </div>
 
                 <h4 class="text-xl font-bold text-gray-800 mb-4">Your Information</h4>
-                <div class="order-customer-details space-y-4 mb-6">
-                    <div>
-                        <label for="customerName">Full Name:</label>
-                        <input type="text" id="customerName" placeholder="Your Full Name" class="mt-1">
+                <form id="customer-order-form">
+                    <div class="order-customer-details space-y-4 mb-6">
+                        <div>
+                            <label for="customerName">Full Name: <span class="text-red-500">*</span></label>
+                            <input type="text" id="customerName" placeholder="Your Full Name" class="mt-1" required>
+                        </div>
+                        <div>
+                            <label for="customerCompany">Company Name (Optional):</label>
+                            <input type="text" id="customerCompany" placeholder="Your Company Name" class="mt-1">
+                        </div>
+                        <div>
+                            <label for="customerContact">Contact Number: <span class="text-red-500">*</span></label>
+                            <input type="tel" id="customerContact" placeholder="e.g., +679 9999999" class="mt-1" required>
+                        </div>
+                        <div>
+                            <label for="customerAddress">Delivery Address: <span class="text-red-500">*</span></label>
+                            <textarea id="customerAddress" placeholder="Street, City, Postcode" class="mt-1" required></textarea>
+                        </div>
+                         <div>
+                            <label for="paymentMethod">Payment Method: <span class="text-red-500">*</span></label>
+                            <select id="paymentMethod" class="mt-1" required>
+                                <option value="Cash (COD)">Cash (COD)</option>
+                                <option value="Mpaisa">Mpaisa</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="customerFeedback">Inquiry / Feedback (Optional):</label>
+                            <textarea id="customerFeedback" placeholder="Enter your inquiry or feedback here..." class="mt-1"></textarea>
+                        </div>
                     </div>
-                    <div>
-                        <label for="customerCompany">Company Name (Optional):</label>
-                        <input type="text" id="customerCompany" placeholder="Your Company Name" class="mt-1">
-                    </div>
-                    <div>
-                        <label for="customerContact">Contact Number:</label>
-                        <input type="tel" id="customerContact" placeholder="e.g., +679 9999999" class="mt-1">
-                    </div>
-                    <div>
-                        <label for="customerAddress">Delivery Address:</label>
-                        <textarea id="customerAddress" placeholder="Street, City, Postcode" class="mt-1"></textarea>
-                    </div>
-                    <div>
-                        <label for="customerFeedback">Inquiry / Feedback (Optional):</label>
-                        <textarea id="customerFeedback" placeholder="Enter your inquiry or feedback here..." class="mt-1"></textarea>
-                    </div>
-                </div>
+                </form>
 
 
                 <h4 class="text-xl font-bold text-gray-800 mb-4">Customer Order Summary</h4>
@@ -849,6 +879,8 @@
                 </div>
 
                 <p class="order-thank-you">Thank you for your order with Indulge Wine Club! We will contact you shortly to confirm delivery details.</p>
+                
+                <div id="order-form-error"></div>
 
                 <div class="order-button-group">
                     <button id="emailOrderButton" class="email-button">
@@ -889,11 +921,14 @@
             const finalDeliveryFeeSpan = document.getElementById('finalDeliveryFee');
             const finalGrandTotalPriceSpan = document.getElementById('finalGrandTotalPrice');
 
+            const customerOrderForm = document.getElementById('customer-order-form');
             const customerNameInput = document.getElementById('customerName');
             const customerCompanyInput = document.getElementById('customerCompany');
             const customerContactInput = document.getElementById('customerContact');
             const customerAddressInput = document.getElementById('customerAddress');
+            const paymentMethodSelect = document.getElementById('paymentMethod');
             const customerFeedbackInput = document.getElementById('customerFeedback');
+            const orderFormError = document.getElementById('order-form-error');
 
             const emailOrderButton = document.getElementById('emailOrderButton');
 
@@ -1077,7 +1112,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 // Sam Miranda Riesling (from image: Normal Price $29.00 VIP EACH)
                 { id: "SAMMIRARSLG", name: "Sam Miranda Riesling", brand: "Sam Miranda", country: "Australia", type: "White Wine", vintage: "2023", grapeVariety: "Riesling", region: "King Valley", size: "750 ml", price: 29.00, isVinoSale: true },
                 // Sam Miranda 'Ballerina' Moscato (from image: Normal Price $31.00 VIP EACH)
-                { id: "SAMMOSCATO", name: "Sam Miranda 'Ballerina' Moscato", brand: "Sam Miranda", country: "Australia", type: "White Wine", vintage: "", grapeVariety: "Moscato", region: "King Valley", size: "750 ml", price: 31.00, isVinoSale: true },
+                { id: "SAMMOSCATO", name: "Sam Miranda 'Ballerina' Moscato", brand: "Sam Miranda", country: "Australia", type: "Sparkling", vintage: "", grapeVariety: "Moscato", region: "King Valley", size: "750 ml", price: 31.00, isVinoSale: true },
                 // Sam Miranda 'Ballerina' Rosato (from image: Normal Price $31.00 VIP EACH)
                 { id: "SAMROSATO", name: "Sam Miranda 'Ballerina' Rosato", brand: "Sam Miranda", country: "Australia", type: "Rosé", vintage: "", grapeVariety: "Rosato", region: "King Valley", size: "750 ml", price: 31.00, isVinoSale: true },
                 // Vistamar 'Reserva' Pinot Noir (from image: Normal Price $31.00 VIP EACH)
@@ -1810,21 +1845,22 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 const customerCompany = customerCompanyInput.value.trim();
                 const customerContact = customerContactInput.value.trim();
                 const customerAddress = customerAddressInput.value.trim();
+                const paymentMethod = paymentMethodSelect.value;
                 const customerFeedback = customerFeedbackInput.value.trim();
 
                 let orderSummary = "--- Indulge Wine Club Order ---\n";
                 orderSummary += "Order Date: " + new Date().toLocaleDateString() + "\n\n";
 
-                if (customerName || customerCompany || customerContact || customerAddress || customerFeedback) {
-                    orderSummary += "Customer Information:\n";
-                    orderSummary += "--------------------------------------------------\n";
-                    if (customerName) orderSummary += `Name: ${customerName}\n`;
-                    if (customerCompany) orderSummary += `Company: ${customerCompany}\n`;
-                    if (customerContact) orderSummary += `Contact: ${customerContact}\n`;
-                    if (customerAddress) orderSummary += `Address: ${customerAddress}\n`;
-                    if (customerFeedback) orderSummary += `Inquiry/Feedback: ${customerFeedback}\n`;
-                    orderSummary += "--------------------------------------------------\n\n";
-                }
+                orderSummary += "Customer Information:\n";
+                orderSummary += "--------------------------------------------------\n";
+                orderSummary += `Name: ${customerName}\n`;
+                if (customerCompany) orderSummary += `Company: ${customerCompany}\n`;
+                orderSummary += `Contact: ${customerContact}\n`;
+                orderSummary += `Address: ${customerAddress}\n`;
+                orderSummary += `Payment Method: ${paymentMethod}\n`;
+                if (customerFeedback) orderSummary += `Inquiry/Feedback: ${customerFeedback}\n`;
+                orderSummary += "--------------------------------------------------\n\n";
+                
 
                 let totalItems = 0;
                 let subTotal = 0;
@@ -1903,6 +1939,18 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
             });
 
             emailOrderButton.addEventListener('click', () => {
+                // Validate form
+                if (!customerOrderForm.checkValidity()) {
+                    orderFormError.textContent = 'Please fill out all required fields: Full Name, Contact Number, and Delivery Address.';
+                    orderFormError.style.display = 'block';
+                    // Trigger browser's native validation UI
+                    customerOrderForm.reportValidity();
+                    return;
+                }
+                
+                // Hide error if validation passes
+                orderFormError.style.display = 'none';
+
                 const customerName = customerNameInput.value.trim();
                 const now = new Date();
                 const date = now.toLocaleDateString('en-CA');
@@ -1921,7 +1969,9 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 // Check for potential length issues (though rare for typical orders)
                 if (mailtoLink.length > 2000) {
                     console.warn("Mailto link might be too long for some email clients/browsers. Length:", mailtoLink.length);
-                    alert("The generated email order is too long for some email clients. Please copy the order details manually or try again with a smaller order.");
+                    // Instead of alert, show the error in our custom message box
+                    orderFormError.textContent = "The generated email order is too long for some email clients. Please copy the order details manually or try again with a smaller order.";
+                    orderFormError.style.display = 'block';
                 } else {
                     window.location.href = mailtoLink;
                 }
