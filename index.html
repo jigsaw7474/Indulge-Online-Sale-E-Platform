@@ -718,11 +718,14 @@
         </div>
 
         <div class="menu-bar">
-            <button class="menu-button active" data-target="specials">
-                <i class="fas fa-star"></i> Specials
+            <button class="menu-button active" data-target="mid-year-sale">
+                <i class="fas fa-star"></i> Mid Year Sale!
             </button>
             <button class="menu-button vino-sale" data-target="vino-sale">
                 <i class="fas fa-fire"></i> Vino Sale!
+            </button>
+            <button class="menu-button" data-target="other-beverages">
+                <i class="fas fa-wine-bottle"></i> Other Beverages
             </button>
             <a href="https://online.flippingbook.com/view/1021095359/" target="_blank" class="menu-button">
                 <i class="fas fa-book-open"></i> Wine List
@@ -734,10 +737,10 @@
             <p class="text-sm text-gray-700 mt-2 w-full text-center">Promo available in Suva CBD</p>
         </div>
 
-        <!-- Specials Section (formerly Products) -->
-        <div id="specials" class="content-section active">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Monthly Wine Specials</h2>
-            <p class="text-center text-gray-600 mb-6">Valid from 13th June to 30th June, 2025. *Stock subject to availability and conditions apply.</p>
+        <!-- Mid Year Sale Section (formerly Specials) -->
+        <div id="mid-year-sale" class="content-section active">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Mid Year Sale!</h2>
+            <p class="text-center text-gray-600 mb-6">Specials valid till August 5th 2025. *Stock subject to availability and conditions apply.</p>
 
             <!-- Filter and Search Bar -->
             <div class="flex flex-wrap justify-center gap-4 mb-6">
@@ -752,7 +755,7 @@
                 <input type="text" id="brandSearch" placeholder="Search by Name, Grape, or Brand..." class="search-bar">
             </div>
 
-            <div id="productGrid" class="product-grid">
+            <div id="midYearSaleGrid" class="product-grid">
                 <!-- Products will be dynamically loaded here -->
             </div>
         </div>
@@ -760,7 +763,7 @@
         <!-- Vino Sale Section -->
         <div id="vino-sale" class="content-section">
             <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Vino Sale! Hot Deals!</h2>
-            <p class="text-center text-gray-600 mb-6">Available in the month of June 2025 while stock lasts. Special valid on selected stock only. Limited stock available at each outlet. Conditions Apply.</p>
+            <p class="text-center text-gray-600 mb-6">Available in the month of July 2025 while stock lasts. Special valid on selected stock only. Limited stock available at each outlet. Conditions Apply.</p>
             <!-- Filter and Search Bar for Vino Sale (Optional - can be added here if needed) -->
             <div class="flex flex-wrap justify-center gap-4 mb-6">
                 <select id="vinoSaleCountryFilter" class="p-2 border rounded-full shadow-sm text-gray-700">
@@ -778,6 +781,14 @@
                 <!-- Vino Sale products will be dynamically loaded here -->
             </div>
         </div>
+        
+        <!-- Other Beverages Section -->
+        <div id="other-beverages" class="content-section">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Other Beverages</h2>
+            <div id="otherBeveragesGrid" class="product-grid">
+                <!-- Other beverages will be dynamically loaded here -->
+            </div>
+        </div>
 
 
         <!-- Cart Section -->
@@ -789,7 +800,7 @@
             </div>
             <p id="emptyCartMessage" class="text-center text-gray-600">Your cart is empty. Add some wines!</p>
             <div id="cartSummary" class="cart-summary">
-                <span>Total Bottles: <span id="totalBottles">0</span></span>
+                <span>Total Items: <span id="totalBottles">0</span></span>
                 <span class="text-red-600 font-bold">Total Discount: -FJ$<span id="totalDiscount">0.00</span></span>
                 <span>Subtotal: FJ$<span id="subTotalPrice">0.00</span></span>
                 <span id="deliveryFeeContainer">Delivery Fee: FJ$<span id="deliveryFee">0.00</span></span>
@@ -871,7 +882,7 @@
                 </div>
 
                 <div id="orderSummaryTotals" class="order-summary-totals">
-                    <div>Total Bottles: <span id="finalTotalBottles">0</span></div>
+                    <div>Total Items: <span id="finalTotalBottles">0</span></div>
                     <div class="text-red-600">Total Discount: -FJ$<span id="finalTotalDiscount">0.00</span></div>
                     <div>Subtotal: FJ$<span id="finalSubTotalPrice">0.00</span></div>
                     <div>Delivery Fee: FJ$<span id="finalDeliveryFee">0.00</span></div>
@@ -900,8 +911,9 @@
             const menuButtons = document.querySelectorAll('.menu-button');
             const viewCartButton = document.getElementById('viewCartButton'); // Get the specific cart button
             const contentSections = document.querySelectorAll('.content-section');
-            const specialsGrid = document.getElementById('productGrid');
+            const midYearSaleGrid = document.getElementById('midYearSaleGrid');
             const vinoSaleGrid = document.getElementById('vinoSaleGrid');
+            const otherBeveragesGrid = document.getElementById('otherBeveragesGrid');
             const cartItemsContainer = document.getElementById('cartItemsContainer');
             const cartItemCountSpan = document.getElementById('cartItemCount');
             const totalBottlesSpan = document.getElementById('totalBottles');
@@ -932,101 +944,145 @@
 
             const emailOrderButton = document.getElementById('emailOrderButton');
 
-            let products = []; // This will now hold only 'specials' wines
+            let midYearSaleProducts = []; // This will hold 'Mid Year Sale' wines
             let vinoSaleProducts = []; // This will hold 'Vino Sale' wines
+            let otherBeveragesProducts = []; // This will hold other beverages
 
             // --- START: Wine Product Image Map ---
             // This map contains specific image URLs for certain products.
             // If a product's ID is not found here, a generic placeholder will be used.
             const productImageMap = {
-                // Chile Wines (from initial specials data)
-                "WARGMAECHD010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Chardonnay.png?raw=true", // Mancura Etnia Chardonnay
-                "WARGMAESBL010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Sauvignon%20Blanc.png?raw=true", // Mancura Etnia Sauvignon Blanc
-                "WARGMAECAR010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Carm%C3%A9n%C3%A8re.png?raw=true", // Mancura Etnia Carménère
-                "WARGMAEMER010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Merlot.png?raw=true", // Mancura Etnia Merlot
-                "WARGVIBCHD010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Chardonnay.png?raw=true", // Vistamar Brisa Chardonnay
-                "WARGVIBSBL010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Sauvignon%20Blanc.png?raw=true", // Vistamar Brisa Sauvignon Blanc
-                "WARGVIBCAR010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Carm%C3%A9n%C3%A8re.png?raw=true", // Vistamar Brisa Carménère
-                "WARGVIBMER010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Merlot.png?raw=true", // Vistamar Brisa Merlot
-                "WARGVIBCAB010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Cabernet%20Sauvignon.png?raw=true", // Vistamar Brisa Cabernet Sauvignon
-                "WARGVISRMLB010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Reserva%20Malbec.png?raw=true", // Vistamar Reserva Malbec
-                "WARGVISRPN010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Reserva%20Pinot%20Noir.png?raw=true", // Vistamar Reserva Pinot Noir
-                "WARGVISRCAB010": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Reserva%20Cabernet%20Sauvignon.png?raw=true", // Vistamar Reserva Cabernet Sauvignon
+                // Mid Year Sale Images (placeholders, replace with actual URLs)
+                "MYS-SLI-HPL": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sweet%20Lips%20Infusions%20Hibiscus%20Pomegranate%20&%20Lime.png?raw=true",
+                "MYS-SLI-MEP": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sweet%20Lips%20Infusions%20Mango%20Elderflower%20&%20Passionfruit.png?raw=true",
+                "MYS-SLI-PRV": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sweet%20Lips%20Infusions%20Peach%20Raspberry%20&%20Vanilla.png?raw=true",
+                "MYS-SLI-PCL": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sweet%20Lips%20Infusions%20Pineapple%20Coconut%20&%20Mexican%20Lime%20(2).png?raw=true",
+                "MYS-VBM-BR": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Brisa%20Ros%C3%A9.png?raw=true",
+                "MYS-MET-CHD": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Chardonnay.png?raw=true",
+                "MYS-MET-MOS": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Mancura%20Etnia%20Moscato.png?raw=true",
+                "MYS-RIC-MER": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Richland%20Merlot.png?raw=true",
+                "MYS-RIC-CHD": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Richland%20Chardonnay.png?raw=true",
+                "MYS-RIC-SB": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Richland%20Sauvignon%20Blanc.png?raw=true",
+                "MYS-RIC-MOS": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Richland%20Moscato.png?raw=true",
+                "MYS-SMR-CHD": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Chardonnay.png?raw=true",
+                "MYS-SMR-MER": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Merlot.png?raw=true",
+                "MYS-SMR-SHZ": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Shiraz.png?raw=true",
+                "MYS-SMR-CS": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Cabernet%20Sauvignon.png?raw=true",
+                "MYS-JPC-CSB": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Ch%C3%A9net%20Sauvignon%20Blanc.png?raw=true",
+                "MYS-JPC-GC": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Chenet%20Grenache%20Cinsault.png?raw=true",
+                "MYS-JPC-CSY": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Ch%C3%A9net%20Cabernet_Shiraz.png?raw=true",
+                "MYS-JPC-SHZ": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Chenet%20Shiraz.png?raw=true",
+                "MYS-JPC-MER": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Chenet%20Merlot.png?raw=true",
+                "MYS-BDA-WB": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/Baron%20D'Arignac%20White%20Blend.png?raw=true",
+                "MYS-BDA-RB": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/Baron%20D'Arignac%20Red%20Blend.png?raw=true",
+                "MYS-BDA-DSR": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/Baron%20D'Arignac%20Demi%20Sec%20Ros%C3%A9.png?raw=true",
+                "MYS-YT-MER": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Yellow%20Tail%20Merlot.png?raw=true",
+                "MYS-YT-CM": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Yellow%20Tail%20Cabernet%20Merlot.png?raw=true",
+                "MYS-YT-CS": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Yellow%20Tail%20Cabernet%20Sauvignon.png?raw=true",
+                "MYS-YT-SC": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Yellow%20Tail%20Cabernet%20Shiraz.png?raw=true",
 
-                // Australian Wines (from flyers for specials)
-                "WAUGPMSL010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Gossips%20Pink%20Moscato.png?raw=true",
-                "WAUGPPMO010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Gossips%20Moscato.png?raw=true",
-                "WAUGPROS010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Gossips%20Ros%C3%A9.png?raw=true",
-                "WAUGPSB010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Gossips%20Sauvignon%20Blanc.png?raw=true",
-                "WAUGPMER010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Gossips%20Merlot.png?raw=true",
-                "WAUGPSHI010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Gossips%20Shiraz.png?raw=true",
-                "WAUGPSSB010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Gossips%20Semillon_Sauvignon%20Blanc.png?raw=true",
-                "WAUGPCAB010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Gossips%20Cabernet%20Sauvignon.png?raw=true",
+                // Vino Sale Images
+                "LANLWRRSLG": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Langmeil%20Live%20Wire%20Riesling.png?raw=true",
+                "LANLWRCSRO": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Langmeil%20Bella%20Rouge%20Ros%C3%A9.png?raw=true",
+                "SAMMIRACHD": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Chardonnay.png?raw=true",
+                "SAMMIRARSLG": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Riesling.png?raw=true",
+                "SAMMOSCATO": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Ballerina%20Moscato.png?raw=true",
+                "SAMROSATO": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Ballerina%20Rosato.png?raw=true",
+                "VISTARPN": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Reserva%20Pinot%20Noir.png?raw=true",
+                "JPCHCHD": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Ch%C3%A9net%20Chardonnay.png?raw=true",
+                "JPCHSVBL": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Ch%C3%A9net%20Sauvignon%20Blanc.png?raw=true",
+                "JPCHSHRZ": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Ch%C3%A9net%20Shiraz.png?raw=true",
+                "POKERCHD": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Poker%20Face%20Chardonnay.png?raw=true",
+                "RICHLANDCS": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Richland%20Cabernet%20Sauvignon.png?raw=true",
 
-                "WAURMPMOS010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Rumours%20Pink%20Moscato.png?raw=true",
-                "WAURMCHD010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Rumours%20Chardonnay.png?raw=true",
-                "WAURMPG010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Rumours%20Pinot%20Grigio.png?raw=true",
-                "WAURMMER010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Rumours%20Merlot.png?raw=true",
-                "WAURMCMR010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Rumours%20Cabernet%20Merlot.png?raw=true",
-                "WAURMSHI010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Rumours%20Shiraz.png?raw=true",
-                "WAURMCSV010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Rumours%20Cabernet%20Sauvignon.png?raw=true",
-
-                "WAUYTSBL010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Yellow%20Tail%20Sauvignon%20Blanc.png?raw=true",
-                "WAUYTMER010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Yellow%20Tail%20Merlot.png?raw=true",
-                "WAUYTSHI010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Yellow%20Tail%20Shiraz.png?raw=true",
-                "WAUYTCAB010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Yellow%20Tail%20Cabernet%20Sauvignon.png?raw=true",
-
-                "WAUGSLIHPL010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sweet%20Lips%20Infusions%20Hibiscus%20Pomegranate%20&%20Lime.png?raw=true",
-                "WAUGSLIMEP010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sweet%20Lips%20Infusions%20Mango%20Elderflower%20&%20Passionfruit.png?raw=true",
-                "WAUGSLIPRV010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sweet%20Lips%20Infusions%20Peach%20Raspberry%20&%20Vanilla.png?raw=true",
-                "WAUGSLIPCM010": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sweet%20Lips%20Infusions%20Pineapple%20Coconut%20&%20Mexican%20Lime%20(2).png?raw=true", // Reusing peach image
-
-                // Vino Sale Images (newly added based on your images)
-                "LANLWRRSLG": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Langmeil%20Live%20Wire%20Riesling.png?raw=true", // Langmeil 'Live Wire' Riesling
-                "LANLWRCSRO": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Langmeil%20Bella%20Rouge%20Ros%C3%A9.png?raw=true", // Langmeil 'Live Wire' Cabernet Rosé
-                "SAMMIRACHD": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Chardonnay.png?raw=true", // Sam Miranda Chardonnay
-                "SAMMIRARSLG": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Riesling.png?raw=true", // Sam Miranda Riesling
-                "SAMMOSCATO": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Ballerina%20Moscato.png?raw=true", // Sam Miranda 'Ballerina' Moscato (using Sam Miranda Chardonnay as placeholder for now, original is Moscato)
-                "SAMROSATO": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Sam%20Miranda%20Ballerina%20Rosato.png?raw=true", // Sam Miranda 'Ballerina' Rosato (using Yellowtail Merlot as placeholder for now, original is Rosato)
-                "VISTARPN": "https://github.com/jigsaw7474/Final-/blob/main/Chile%20Wine%20Images/Vistamar%20Reserva%20Pinot%20Noir.png?raw=true", // Vistamar 'Reserva' Pinot Noir (using sweetlips mango as placeholder for now, original is Pinot Noir)
-                "JPCHCHD": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Ch%C3%A9net%20Chardonnay.png?raw=true", // JP Chenet Chardonnay
-                "JPCHSVBL": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Ch%C3%A9net%20Sauvignon%20Blanc.png?raw=true", // JP Chenet Sauvignon Blanc (using Vistamar Brisa Chardonnay as placeholder for now, original is Sauv Blanc)
-                "JPCHSHRZ": "https://github.com/jigsaw7474/Final-/blob/main/French%20Wine%20Images/JP%20Ch%C3%A9net%20Shiraz.png?raw=true", // JP Chenet Shiraz
-                "POKERCHD": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Poker%20Face%20Chardonnay.png?raw=true", // Pokerface Chardonnay
-                "RICHLANDCS": "https://github.com/jigsaw7474/Final-/blob/main/Australian%20Wine%20Images/Richland%20Cabernet%20Sauvignon.png?raw=true" // Richland Cabernet Sauvignon
+                // Other Beverages
+                "OB-REAL-ORG": "https://github.com/jigsaw7474/Final-/blob/main/Real%20Juice/Real%20Juice%20Orange.png?raw=true",
+                "OB-REAL-APL": "https://github.com/jigsaw7474/Final-/blob/main/Real%20Juice/Real%20Juice%20Apple.png?raw=true"
             };
             // --- END: Wine Product Image Map ---
 
-            // Define special offer product IDs and their deals (for the "Specials" tab)
-            const specialOffers = [
+            // Define Mid Year Sale offers
+            const midYearSaleOffers = [
                 {
                     productCodes: [
-                        "WAUGPMSL010", "WAUGPPMO010", "WAUGPROS010", "WAUGPSB010",
-                        "WAUGPMER010", "WAUGPSHI010", "WAUGPSSB010", "WAUGPCAB010", // Gossips
-                        "WAURMPMOS010", "WAURMCHD010", "WAURMPG010", "WAURMMER010",
-                        "WAURMCMR010", "WAURMSHI010", "WAURMCSV010" // Rumours
+                        "MYS-SLI-HPL", "MYS-SLI-MEP", "MYS-SLI-PRV", "MYS-SLI-PCL",
+                        "MYS-VBM-BR",
+                        "MYS-MET-CHD", "MYS-MET-MOS",
+                        "MYS-RIC-MER", "MYS-RIC-CHD", "MYS-RIC-SB", "MYS-RIC-MOS"
                     ],
-                    offerPrice: 35.00, // 2 for $35 VIP
-                    dealDescription: "2 for $35 VIP"
+                    offerPrice: 40.00,
+                    dealDescription: "Pick any 2 for $40"
                 },
                 {
                     productCodes: [
-                        "WAUYTSBL010", "WAUYTMER010", "WAUYTSHI010", "WAUYTCAB010" // Yellowtail
+                        "MYS-YT-MER", "MYS-YT-CM", "MYS-YT-CS", "MYS-YT-SC",
+                        "MYS-BDA-WB", "MYS-BDA-RB"
                     ],
-                    offerPrice: 45.00, // 2 for $45 VIP
-                    dealDescription: "2 for $45 VIP"
+                    offerPrice: 45.00,
+                    dealDescription: "Pick any 2 for $45"
                 },
                 {
                     productCodes: [
-                        "WARGMAECHD010", "WARGMAESBL010", "WARGMAECAR010", "WARGMAEMER010", // Mancura Etnia
-                        "WARGVIBCHD010", "WARGVIBSBL010", "WARGVIBCAR010", "WARGVIBMER010",
-                        "WARGVIBCAB010", // Vistamar Brisa
-                        "WAUGSLIHPL010", "WAUGSLIMEP010", "WAUGSLIPRV010", "WAUGSLIPCM010" // Sweet Lips Infusion
+                        "MYS-SMR-CHD", "MYS-SMR-MER", "MYS-SMR-SHZ", "MYS-SMR-CS",
+                        "MYS-JPC-CSB", "MYS-JPC-GC", "MYS-JPC-CSY", "MYS-JPC-SHZ", "MYS-JPC-MER",
+                        "MYS-BDA-DSR"
                     ],
-                    offerPrice: 40.00, // 2 for $40 VIP
-                    dealDescription: "2 for $40 VIP"
+                    offerPrice: 50.00,
+                    dealDescription: "Pick any 2 for $50"
                 }
             ];
+            
+            // Hardcoded data for Mid Year Sale products
+            const midYearSaleRawData = [
+                // 2 for $40 Group
+                { id: "MYS-SLI-HPL", name: "Sweet Lips Infusions Hibiscus Pomegranate & Lime", brand: "Sweet Lips Infusions", country: "Australia", type: "Rosé", grapeVariety: "Moscato Base", price: 23.00 },
+                { id: "MYS-SLI-MEP", name: "Sweet Lips Infusions Mango Elderflower & Passionfruit", brand: "Sweet Lips Infusions", country: "Australia", type: "White Wine", grapeVariety: "Moscato Base", price: 23.00 },
+                { id: "MYS-SLI-PRV", name: "Sweet Lips Infusions Peach Raspberry & Vanilla", brand: "Sweet Lips Infusions", country: "Australia", type: "Rosé", grapeVariety: "Moscato Base", price: 23.00 },
+                { id: "MYS-SLI-PCL", name: "Sweet Lips Infusions Pineapple Coconut & Mexican Lime", brand: "Sweet Lips Infusions", country: "Australia", type: "White Wine", grapeVariety: "Moscato Base", price: 23.00 },
+                { id: "MYS-VBM-BR", name: "Vistamar Brisa Rosé", brand: "Vistamar", country: "Chile", type: "Rosé", grapeVariety: "Rosé", price: 23.00 },
+                { id: "MYS-MET-CHD", name: "Mancura Etnia Chardonnay", brand: "Mancura Etnia", country: "Chile", type: "White Wine", grapeVariety: "Chardonnay", price: 23.00 },
+                { id: "MYS-MET-MOS", name: "Mancura Etnia Moscato", brand: "Mancura Etnia", country: "Chile", type: "White Wine", grapeVariety: "Moscato", price: 23.00 },
+                { id: "MYS-RIC-MER", name: "Richland Merlot", brand: "Richland", country: "Australia", type: "Red Wine", grapeVariety: "Merlot", price: 23.00 },
+                { id: "MYS-RIC-CHD", name: "Richland Chardonnay", brand: "Richland", country: "Australia", type: "White Wine", grapeVariety: "Chardonnay", price: 23.00 },
+                { id: "MYS-RIC-SB", name: "Richland Sauvignon Blanc", brand: "Richland", country: "Australia", type: "White Wine", grapeVariety: "Sauvignon Blanc", price: 23.00 },
+                { id: "MYS-RIC-MOS", name: "Richland Moscato", brand: "Richland", country: "Australia", type: "White Wine", grapeVariety: "Moscato", price: 23.00 },
+
+                // 2 for $45 Group
+                { id: "MYS-YT-MER", name: "Yellow Tail Merlot", brand: "Yellow Tail", country: "Australia", type: "Red Wine", grapeVariety: "Merlot", price: 25.00 },
+                { id: "MYS-YT-CM", name: "Yellow Tail Cabernet Merlot", brand: "Yellow Tail", country: "Australia", type: "Red Wine", grapeVariety: "Cabernet Merlot", price: 25.00 },
+                { id: "MYS-YT-CS", name: "Yellow Tail Cabernet Sauvignon", brand: "Yellow Tail", country: "Australia", type: "Red Wine", grapeVariety: "Cabernet Sauvignon", price: 25.00 },
+                { id: "MYS-YT-SC", name: "Yellow Tail Shiraz Cabernet", brand: "Yellow Tail", country: "Australia", type: "Red Wine", grapeVariety: "Shiraz Cabernet", price: 25.00 },
+                { id: "MYS-BDA-WB", name: "Baron D'Arignac White Blend", brand: "Baron D'Arignac", country: "France", type: "White Wine", grapeVariety: "White Blend", price: 25.00 },
+                { id: "MYS-BDA-RB", name: "Baron D'Arignac Red Blend", brand: "Baron D'Arignac", country: "France", type: "Red Wine", grapeVariety: "Red Blend", price: 25.00 },
+
+                // 2 for $50 Group
+                { id: "MYS-SMR-CHD", name: "Sam Miranda Chardonnay", brand: "Sam Miranda", country: "Australia", type: "White Wine", grapeVariety: "Chardonnay", price: 29.00 },
+                { id: "MYS-SMR-MER", name: "Sam Miranda Merlot", brand: "Sam Miranda", country: "Australia", type: "Red Wine", grapeVariety: "Merlot", price: 29.00 },
+                { id: "MYS-SMR-SHZ", name: "Sam Miranda Shiraz", brand: "Sam Miranda", country: "Australia", type: "Red Wine", grapeVariety: "Shiraz", price: 29.00 },
+                { id: "MYS-SMR-CS", name: "Sam Miranda Cabernet Sauvignon", brand: "Sam Miranda", country: "Australia", type: "Red Wine", grapeVariety: "Cabernet Sauvignon", price: 29.00 },
+                { id: "MYS-JPC-CSB", name: "JP Chenet Colombard Sauvignon", brand: "JP Chenet", country: "France", type: "White Wine", grapeVariety: "Colombard Sauvignon", price: 29.00 },
+                { id: "MYS-JPC-GC", name: "JP Chenet Grenache Cinsault", brand: "JP Chenet", country: "France", type: "Rosé", grapeVariety: "Grenache Cinsault", price: 29.00 },
+                { id: "MYS-JPC-CSY", name: "JP Chenet Cabernet Syrah", brand: "JP Chenet", country: "France", type: "Red Wine", grapeVariety: "Cabernet Syrah", price: 29.00 },
+                { id: "MYS-JPC-SHZ", name: "JP Chenet Shiraz", brand: "JP Chenet", country: "France", type: "Red Wine", grapeVariety: "Shiraz", price: 29.00 },
+                { id: "MYS-JPC-MER", name: "JP Chenet Merlot", brand: "JP Chenet", country: "France", type: "Red Wine", grapeVariety: "Merlot", price: 29.00 },
+                { id: "MYS-BDA-DSR", name: "Baron D'Arignac Demi Sec Rosé", brand: "Baron D'Arignac", country: "France", type: "Rosé", grapeVariety: "Demi Sec Rosé", price: 29.00 }
+            ];
+            
+            // Define Other Beverages offers
+            const otherBeveragesOffers = [
+                 {
+                    productCodes: ["OB-REAL-ORG", "OB-REAL-APL"],
+                    offerPrice: 20.00,
+                    dealDescription: "Pick any 2 for $20"
+                }
+            ];
+            
+            // Hardcoded data for Other Beverages
+            const otherBeveragesRawData = [
+                { id: "OB-REAL-ORG", name: "Real Juice Orange 2000ml", brand: "Real Juice", country: "Fiji", type: "Juice", grapeVariety: "Orange", price: 13.00 },
+                { id: "OB-REAL-APL", name: "Real Juice Apple 2000ml", brand: "Real Juice", country: "Fiji", type: "Juice", grapeVariety: "Apple", price: 13.00 }
+            ];
+
 
             // Define Vino Sale offers based on attached images
             const vinoSaleOffers = [
@@ -1061,45 +1117,6 @@
                     dealDescription: "2 for $30 VIP"
                 }
             ];
-
-            // Data for "Specials" (pulled from existing rawCsvData and filtered by isSpecial)
-            const rawCsvDataSpecials = {
-                "Chile.csv": `Code,Brand,Wine Name,Vintage,Grape Variety,Region,Size,Indulge Unit RP (VIP)
-WARGMAECHD010,Mancura,Mancura Etnia,2022,Chardonnay,Central Valley,750 ml,23
-WARGMAESBL010,Mancura,Mancura Etnia,2022,Sauvignon Blanc,Central Valley,750 ml,23
-WARGMAECAR010,Mancura,Mancura Etnia,2021,Carménère,Central Valley,750 ml,23
-WARGMAEMER010,Mancura,Mancura Etnia,2021,Merlot,Central Valley,750 ml,23
-WARGVIBCHD010,Vistamar,Vistamar Brisa,-,Chardonnay,Central Valley,750 ml,23
-WARGVIBSBL010,Vistamar,Vistamar Brisa,-,Sauvignon Blanc,Central Valley,750 ml,23
-WARGVIBCAR010,Vistamar,Vistamar Brisa,-,Carménère,Central Valley,750 ml,23
-WARGVIBMER010,Vistamar,Vistamar Brisa,-,Merlot,Central Valley,750 ml,23
-WARGVIBCAB010,Vistamar,Vistamar Brisa,-,Cabernet Sauvignon,Central Valley,750 ml,23
-`,
-                "Australia.csv": `Code,Brand,Wine Name,Vintage,Grape Variety,Region,Size,Indulge Unit RP (VIP)
-WAUGPMSL010,Gossips,Gossips Sweet Lips White,-,Moscato,South Eastern Australia,750 ml,21
-WAUGPPMO010,Gossips,Gossips Sweet Lips Pink,-,Moscato,South Eastern Australia,750 ml,21
-WAUGPROS010,Gossips,Gossips,2022,Rosé,South Eastern Australia,750 ml,21
-WAUGPSSB010,Gossips,Gossips,-,Semillon Sauvignon Blanc,South Eastern Australia,750 ml,21
-WAUGPSB010,Gossips,Gossips,-,Sauvignon Blanc,South Eastern Australia,750 ml,21
-WAUGPMER010,Gossips,Gossips,2021,Merlot,South Eastern Australia,750 ml,21
-WAUGPCAB010,Gossips,Gossips,2021,Cabernet Sauvignon ,South Eastern Australia,750 ml,21
-WAUGPSHI010,Gossips,Gossips,2020,Shiraz,South Eastern Australia,750 ml,21
-WAURMPMOS010,Rumours,Rumours Pink,-,Moscato,South Eastern Australia,750 ml,18
-WAURMCHD010,Rumours,Rumours,-,Chardonnay,South Eastern Australia,750 ml,21
-WAURMPG010,Rumours,Rumours,-,Pinot Grigio,South Eastern Australia,750 ml,21
-WAURMMER010,Rumours,Rumours,-,Merlot,South Eastern Australia,750 ml,21
-WAURMCMR010,Rumours,Rumours,-,Cabernet Merlot,South Eastern Australia,750 ml,21
-WAURMSHI010,Rumours,Rumours,-,Shiraz,South Eastern Australia,750 ml,21
-WAUYTSBL010,Yellow tail,Yellow tail,-,Sauvignon Blanc,South Eastern Australia,750 ml,25
-WAUYTMER010,Yellow tail,Yellow tail,-,Merlot,South Eastern Australia,750 ml,25
-WAUYTSHI010,Yellow tail,Yellow tail,-,Shiraz,South Eastern Australia,750 ml,25
-WAUYTCAB010,Yellow tail,Yellow tail,-,Cabernet Sauvignon,South Eastern Australia,750 ml,25
-WAUGSLIHPL010,Sweet Lips Infusions,Hibiscus Pomegranate & Lime,NV,Moscato Base,New South Wales,750 ml,23
-WAUGSLIMEP010,Sweet Lips Infusions,Mango Elderflower & Passionfruit,NV,Moscato Base,New South Wales,750 ml,23
-WAUGSLIPRV010,Sweet Lips Infusions,Peach Raspberry & Vanilla,NV,Moscato Base,New South Wales,750 ml,23
-WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato Base,New South Wales,750 ml,23
-`
-            };
 
             // Hardcoded data for Vino Sale products
             const vinoSaleRawData = [
@@ -1138,130 +1155,77 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 if (grapeVarietyLower.includes("sparkling") || wineNameLower.includes("sparkling") ||
                     grapeVarietyLower.includes("prosecco") || wineNameLower.includes("prosecco") ||
                     grapeVarietyLower.includes("champagne") || wineNameLower.includes("champagne") ||
-                    wineNameLower.includes("brut") || wineNameLower.includes("blanc de blancs") ||
+                    grapeVarietyLower.includes("brut") || wineNameLower.includes("blanc de blancs") ||
                     grapeVarietyLower.includes("cava") || wineNameLower.includes("moscato")) {
                     return "Sparkling";
                 } else if (grapeVarietyLower.includes("rosé") || wineNameLower.includes("rosé") ||
                            grapeVarietyLower.includes("rosato")) {
                     return "Rosé";
                 } else if (
-                    ["chardonnay", "sauvignon blanc", "pinot grigio", "riesling", "semillon", "chenin blanc", "moscato", "cortese", "vermentino", "glera", "albarino", "fiano", "verduzzo", "carricante", "white blend", "white", "grillo", "trebbiano"].some(g => grapeVarietyLower.includes(g)) ||
+                    ["chardonnay", "sauvignon blanc", "pinot grigio", "riesling", "semillon", "chenin blanc", "moscato", "cortese", "vermentino", "glera", "albarino", "fiano", "verduzzo", "carricante", "white blend", "white", "grillo", "trebbiano", "colombard sauvignon"].some(g => grapeVarietyLower.includes(g)) ||
                     wineNameLower.includes("white blend") || wineNameLower.includes("white")
                 ) {
                     return "White Wine";
                 } else if (
-                    ["cabernet sauvignon", "merlot", "pinot noir", "shiraz", "grenache", "carménère", "nebbiolo", "sangiovese", "cannonau", "nerello mascalese", "tempranillo", "syrah", "malbec", "cabernet franc", "red blend", "red", "barbera", "zinfandel", "valpolicella"].some(g => grapeVarietyLower.includes(g)) ||
+                    ["cabernet sauvignon", "merlot", "pinot noir", "shiraz", "grenache", "carménère", "nebbiolo", "sangiovese", "cannonau", "nerello mascalese", "tempranillo", "syrah", "malbec", "cabernet franc", "red blend", "red", "barbera", "zinfandel", "valpolicella", "cabernet merlot", "shiraz cabernet", "cabernet syrah"].some(g => grapeVarietyLower.includes(g)) ||
                     wineNameLower.includes("red blend") || wineNameLower.includes("red")
                 ) {
                     return "Red Wine";
                 }
+                 if (wineName.toLowerCase().includes("juice")) {
+                    return "Juice";
+                }
                 return "Other";
             }
 
-            // Function to parse CSV content for Specials
-            function parseCSV(csvString, country) {
-                const lines = csvString.trim().split('\n');
-                let headerLineIndex = -1;
-                for (let i = 0; i < lines.length; i++) {
-                    if (lines[i].includes('Code')) {
-                        headerLineIndex = i;
-                        break;
+            // Load products for 'Mid Year Sale' tab
+            midYearSaleRawData.forEach(wine => {
+                const wineType = inferWineType(wine.grapeVariety, wine.name);
+                let imageUrl = productImageMap[wine.id];
+
+                if (!imageUrl) {
+                     if (wineType === "Red Wine") {
+                        imageUrl = "https://placehold.co/150x200/8B0000/FFFFFF?text=Red+Wine";
+                    } else if (wineType === "White Wine") {
+                        imageUrl = "https://placehold.co/150x200/FFD700/000000?text=White+Wine";
+                    } else if (wineType === "Rosé") {
+                        imageUrl = "https://placehold.co/150x200/FF69B4/000000?text=Ros%C3%A9+Wine";
+                    } else if (wineType === "Sparkling") {
+                        imageUrl = "https://placehold.co/150x200/ADD8E6/000000?text=Sparkling+Wine";
+                    } else {
+                        imageUrl = "https://placehold.co/150x200/cccccc/333333?text=No+Image";
                     }
                 }
 
-                if (headerLineIndex === -1) {
-                    console.error(`Could not find header row in ${country} data.`);
-                    return [];
-                }
-
-                const headers = lines[headerLineIndex].split(',').map(h => h.trim());
-                const data = [];
-
-                for (let i = headerLineIndex + 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line || line.startsWith("Summary") || line.startsWith(',')) continue;
-
-                    const values = [];
-                    let inQuote = false;
-                    let currentVal = '';
-                    for (let j = 0; j < line.length; j++) {
-                        const char = line[j];
-                        if (char === '"') {
-                            inQuote = !inQuote;
-                        } else if (char === ',' && !inQuote) {
-                            values.push(currentVal.trim());
-                            currentVal = '';
-                        } else {
-                            currentVal += char;
-                        }
-                    }
-                    values.push(currentVal.trim());
-
-                    if (values.length !== headers.length) {
-                        console.warn(`Skipping malformed row in ${country} data (value count mismatch): "${line}"`);
-                        continue;
-                    }
-
-                    const row = {};
-                    headers.forEach((header, index) => {
-                        row[header] = values[index];
-                    });
-                    data.push(row);
-                }
-                return data;
-            }
-
-            // Load products ONLY for 'Specials' tab
-            for (const filename in rawCsvDataSpecials) {
-                const countryName = filename.replace('.csv', '');
-                const parsedData = parseCSV(rawCsvDataSpecials[filename], countryName);
-
-                parsedData.forEach(wine => {
-                    const isSpecial = specialOffers.some(offer => offer.productCodes.includes(wine["Code"]));
-                    
-                    if (isSpecial) {
-                        const priceValue = parseFloat(wine["Indulge Unit RP (VIP)"]); 
-
-                        if (isNaN(priceValue) || !wine["Code"] || wine["Code"].trim() === "") {
-                            console.warn(`Skipping invalid wine entry (missing code or price):`, wine);
-                            return;
-                        }
-
-                        const wineType = inferWineType(wine["Grape Variety"], wine["Wine Name"]);
-                        let imageUrl = productImageMap[wine["Code"]];
-
-                        if (!imageUrl) {
-                            if (wineType === "Red Wine") {
-                                imageUrl = "https://placehold.co/150x200/8B0000/FFFFFF?text=Red+Wine";
-                            } else if (wineType === "White Wine") {
-                                imageUrl = "https://placehold.co/150x200/FFD700/000000?text=White+Wine";
-                            } else if (wineType === "Rosé") {
-                                imageUrl = "https://placehold.co/150x200/FF69B4/000000?text=Ros%C3%A9+Wine";
-                            } else if (wineType === "Sparkling") {
-                                imageUrl = "https://placehold.co/150x200/ADD8E6/000000?text=Sparkling+Wine";
-                            } else {
-                                imageUrl = "https://placehold.co/150x200/cccccc/333333?text=No+Image";
-                            }
-                        }
-
-                        products.push({
-                            id: wine["Code"],
-                            name: wine["Wine Name"],
-                            brand: wine["Brand"],
-                            country: countryName,
-                            type: wineType,
-                            vintage: wine["Vintage"],
-                            region: wine["Region"],
-                            size: wine["Size"],
-                            price: priceValue,
-                            image: imageUrl,
-                            grapeVariety: wine["Grape Variety"],
-                            isSpecial: true,
-                            isVinoSale: false // Explicitly set to false
-                        });
-                    }
+                midYearSaleProducts.push({
+                    ...wine,
+                    type: wineType,
+                    image: imageUrl,
+                    isMidYearSale: true,
+                    isVinoSale: false,
+                    isOtherBeverage: false
                 });
-            }
+            });
+
+            // Load products for 'Other Beverages' tab
+            otherBeveragesRawData.forEach(beverage => {
+                const beverageType = inferWineType(beverage.grapeVariety, beverage.name);
+                let imageUrl = productImageMap[beverage.id];
+
+                if (!imageUrl) {
+                    imageUrl = "https://placehold.co/150x200/cccccc/333333?text=No+Image";
+                }
+
+                otherBeveragesProducts.push({
+                    ...beverage,
+                    type: beverageType,
+                    image: imageUrl,
+                    isMidYearSale: false,
+                    isVinoSale: false,
+                    isOtherBeverage: true
+                });
+            });
+
 
             // Load products for 'Vino Sale' tab from hardcoded data
             vinoSaleRawData.forEach(wine => {
@@ -1301,21 +1265,33 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                             price: priceValue,
                             image: imageUrl,
                             grapeVariety: wine.grapeVariety,
-                            isSpecial: false, // Explicitly set to false
-                            isVinoSale: true
+                            isMidYearSale: false,
+                            isVinoSale: true,
+                            isOtherBeverage: false
                         });
                     });
 
 
-            // Helper function to get special offer details for a product (Monthly Specials)
-            function getSpecialOffer(productId) {
-                for (const offer of specialOffers) {
+            // Helper function to get Mid Year Sale offer details for a product
+            function getMidYearSaleOffer(productId) {
+                for (const offer of midYearSaleOffers) {
                     if (offer.productCodes.includes(productId)) {
                         return offer;
                     }
                 }
                 return null;
             }
+            
+            // Helper function to get Other Beverages offer details for a product
+            function getOtherBeveragesOffer(productId) {
+                for (const offer of otherBeveragesOffers) {
+                    if (offer.productCodes.includes(productId)) {
+                        return offer;
+                    }
+                }
+                return null;
+            }
+
 
             // Helper function to get Vino Sale offer details for a product
             function getVinoSaleOffer(productId) {
@@ -1330,12 +1306,12 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
             let cart = {};
 
             // Populate Country Filter based on all available products (combining both lists)
-            const allProductsForFilters = [...products, ...vinoSaleProducts];
+            const allProductsForFilters = [...midYearSaleProducts, ...vinoSaleProducts, ...otherBeveragesProducts];
             const uniqueCountries = [...new Set(allProductsForFilters.map(p => p.country))].sort();
             // These variables are correctly declared here at the top of the scope
-            const countryFilter = document.getElementById('countryFilter'); // For Specials tab
-            const typeFilter = document.getElementById('typeFilter');     // For Specials tab
-            const brandSearch = document.getElementById('brandSearch');   // For Specials tab
+            const countryFilter = document.getElementById('countryFilter'); // For Mid Year Sale tab
+            const typeFilter = document.getElementById('typeFilter');     // For Mid Year Sale tab
+            const brandSearch = document.getElementById('brandSearch');   // For Mid Year Sale tab
             const vinoSaleCountryFilter = document.getElementById('vinoSaleCountryFilter'); // For Vino Sale tab
             const vinoSaleTypeFilter = document.getElementById('vinoSaleTypeFilter');     // For Vino Sale tab
             const vinoSaleBrandSearch = document.getElementById('vinoSaleBrandSearch');   // For Vino Sale tab
@@ -1373,10 +1349,10 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
             });
 
 
-            // Function to render products for the 'Specials' tab
-            function renderSpecialsProducts() {
-                specialsGrid.innerHTML = '';
-                let filteredProducts = products.filter(p => p.isSpecial); // Only show special items
+            // Function to render products for the 'Mid Year Sale' tab
+            function renderMidYearSaleProducts() {
+                midYearSaleGrid.innerHTML = '';
+                let filteredProducts = midYearSaleProducts;
 
                 // Apply filters
                 if (countryFilter.value !== 'All') {
@@ -1400,16 +1376,16 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 }
 
                 if (filteredProducts.length === 0) {
-                    specialsGrid.innerHTML = '<p class="text-center text-gray-600 col-span-full">No monthly specials match your criteria.</p>';
+                    midYearSaleGrid.innerHTML = '<p class="text-center text-gray-600 col-span-full">No Mid Year Sale items match your criteria.</p>';
                     return;
                 }
 
                 filteredProducts.forEach(product => {
-                    const specialOffer = getSpecialOffer(product.id);
-                    const priceDisplay = specialOffer ?
-                        `<p class="text-xl font-bold text-red-600 mb-1">Special: ${specialOffer.dealDescription}</p>
+                    const saleOffer = getMidYearSaleOffer(product.id);
+                    const priceDisplay = saleOffer ?
+                        `<p class="text-xl font-bold text-red-600 mb-1">${saleOffer.dealDescription}</p>
                          <p class="price text-lg font-semibold line-through text-gray-500">FJ$${product.price.toFixed(2)} each</p>` :
-                        `<p class="price">FJ$${product.price.toFixed(2)}</p>`; // Should not happen for specials
+                        `<p class="price">FJ$${product.price.toFixed(2)}</p>`;
 
                     const productCard = document.createElement('div');
                     productCard.classList.add('product-card');
@@ -1424,13 +1400,45 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                             <input type="number" value="1" min="1" class="quantity-input" data-product-id="${product.id}">
                             <button class="increase-quantity" data-product-id="${product.id}">+</button>
                         </div>
-                        <button class="add-to-cart-button" data-product-id="${product.id}" data-product-type="special">
+                        <button class="add-to-cart-button" data-product-id="${product.id}" data-product-type="mid-year-sale">
                             <i class="fas fa-cart-plus"></i> Add to Cart
                         </button>
                     `;
-                    specialsGrid.appendChild(productCard);
+                    midYearSaleGrid.appendChild(productCard);
                 });
-                attachProductEventListeners(specialsGrid, 'special');
+                attachProductEventListeners(midYearSaleGrid, 'mid-year-sale');
+            }
+
+            // Function to render products for the 'Other Beverages' tab
+            function renderOtherBeveragesProducts() {
+                otherBeveragesGrid.innerHTML = '';
+                otherBeveragesProducts.forEach(product => {
+                    const saleOffer = getOtherBeveragesOffer(product.id);
+                    const priceDisplay = saleOffer ?
+                        `<p class="text-xl font-bold text-red-600 mb-1">${saleOffer.dealDescription}</p>
+                         <p class="price text-lg font-semibold line-through text-gray-500">FJ$${product.price.toFixed(2)} each</p>` :
+                        `<p class="price">FJ$${product.price.toFixed(2)}</p>`;
+
+                    const productCard = document.createElement('div');
+                    productCard.classList.add('product-card');
+                    productCard.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}" onerror="this.onerror=null;this.src='https://placehold.co/150x200/cccccc/333333?text=No+Image';" class="product-image">
+                        <h3 class="text-xl font-semibold">${product.name}</h3>
+                        <p class="text-gray-600">${product.country} - ${product.type}</p>
+                        <p class="text-gray-500 text-sm">Brand: ${product.brand} | Flavor: ${product.grapeVariety || 'N/A'}</p>
+                        ${priceDisplay}
+                        <div class="quantity-control">
+                            <button class="decrease-quantity" data-product-id="${product.id}">-</button>
+                            <input type="number" value="1" min="1" class="quantity-input" data-product-id="${product.id}">
+                            <button class="increase-quantity" data-product-id="${product.id}">+</button>
+                        </div>
+                        <button class="add-to-cart-button" data-product-id="${product.id}" data-product-type="other-beverage">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    `;
+                    otherBeveragesGrid.appendChild(productCard);
+                });
+                attachProductEventListeners(otherBeveragesGrid, 'other-beverage');
             }
 
             // Function to render products for the 'Vino Sale' tab
@@ -1454,7 +1462,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                         p.brand.toLowerCase().includes(vinoSaleSearchTerm) ||
                         p.type.toLowerCase().includes(vinoSaleSearchTerm) ||
                         p.country.toLowerCase().includes(vinoSaleSearchTerm) ||
-                        p.grapeVariety.toLowerCase().includes(searchTerm) ||
+                        p.grapeVariety.toLowerCase().includes(vinoSaleSearchTerm) ||
                         p.id.toLowerCase().includes(vinoSaleSearchTerm)
                     );
                 }
@@ -1506,82 +1514,126 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 attachProductEventListeners(vinoSaleGrid, 'vino-sale');
             }
 
-
-            // Function to calculate item price considering specials and vino sale
-            function calculateItemPrice(product, quantity) {
-                if (product.isSpecial) {
-                    const offer = getSpecialOffer(product.id);
+            // Kept for non-mix-and-match deals like Vino Sale
+            function calculateVinoSaleItemPrice(product, quantity) {
+                if (product.isVinoSale) {
+                    const offer = getVinoSaleOffer(product.id);
                     if (offer) {
                         const pairs = Math.floor(quantity / 2);
                         const remaining = quantity % 2;
                         return (pairs * offer.offerPrice) + (remaining * product.price);
                     }
-                } else if (product.isVinoSale) {
-                    const offer = getVinoSaleOffer(product.id);
-                    if (offer) {
-                        const pairs = Math.floor(quantity / 2); // Assuming 2-for-X deals for Vino Sale
-                        const remaining = quantity % 2;
-                        return (pairs * offer.offerPrice) + (remaining * product.price);
-                    }
                 }
-                return product.price * quantity; // Fallback if no special or vino sale applies
+                return product.price * quantity; // Fallback
             }
 
-            // Function to calculate the discount amount for a single product in the cart
-            function calculateItemDiscount(product, quantity) {
-                const originalTotal = product.price * quantity;
-                const discountedTotal = calculateItemPrice(product, quantity);
-                return originalTotal - discountedTotal;
+            // New centralized function to calculate all cart totals, including mix-and-match
+            function calculateCartTotals(cart) {
+                let totalBottles = 0;
+                let subTotal = 0;
+                let totalOriginalPrice = 0;
+
+                const offerGroups = {}; // e.g., { "Pick any 2 for $40": { offer: {...}, items: [] } }
+                const nonOfferItems = [];
+
+                // 1. Group items by offer
+                for (const productId in cart) {
+                    const item = cart[productId];
+                    totalBottles += item.quantity;
+                    let offer = null;
+                    if (item.product.isMidYearSale) {
+                        offer = getMidYearSaleOffer(item.product.id);
+                    } else if (item.product.isOtherBeverage) {
+                        offer = getOtherBeveragesOffer(item.product.id);
+                    }
+
+                    if (offer) { // This handles Mid Year Sale & Other Beverage items
+                        const dealKey = offer.dealDescription;
+                        if (!offerGroups[dealKey]) {
+                            offerGroups[dealKey] = { offer: offer, items: [] };
+                        }
+                        for (let i = 0; i < item.quantity; i++) {
+                            offerGroups[dealKey].items.push(item.product);
+                        }
+                    } else { // This handles Vino Sale and other items
+                        nonOfferItems.push(item);
+                    }
+                }
+
+                // 2. Calculate totals for mix-and-match groups
+                for (const dealKey in offerGroups) {
+                    const group = offerGroups[dealKey];
+                    const items = group.items;
+                    const offer = group.offer;
+
+                    items.sort((a, b) => b.price - a.price);
+
+                    const numPairs = Math.floor(items.length / 2);
+                    const remainingItemsCount = items.length % 2;
+
+                    subTotal += numPairs * offer.offerPrice;
+                    
+                    for (let i = 0; i < numPairs * 2; i++) {
+                        totalOriginalPrice += items[i].price;
+                    }
+
+                    if (remainingItemsCount > 0) {
+                        const remainingItem = items[items.length - 1];
+                        subTotal += remainingItem.price;
+                        totalOriginalPrice += remainingItem.price;
+                    }
+                }
+
+                // 3. Calculate totals for non-mix-and-match items
+                nonOfferItems.forEach(item => {
+                    const itemPrice = calculateVinoSaleItemPrice(item.product, item.quantity);
+                    const originalPrice = item.product.price * item.quantity;
+                    subTotal += itemPrice;
+                    totalOriginalPrice += originalPrice;
+                });
+                
+                const totalDiscount = totalOriginalPrice - subTotal;
+                const deliveryFee = (subTotal > 0 && subTotal < 60) ? 5.00 : 0.00;
+                const grandTotal = subTotal + deliveryFee;
+
+                return { totalBottles, subTotal, totalDiscount, deliveryFee, grandTotal };
             }
 
 
             // Function to update cart display
             function updateCartDisplay() {
                 cartItemsContainer.innerHTML = ''; // Clear previous content
-                let totalBottles = 0;
-                let subTotal = 0;
-                let totalDiscount = 0;
-                let cartIsEmpty = true;
+                
+                const totals = calculateCartTotals(cart);
 
-                // Separate items into two categories
-                const specialCartItems = [];
-                const vinoSaleCartItems = [];
-
-                for (const productId in cart) {
-                    if (cart.hasOwnProperty(productId)) {
-                        cartIsEmpty = false;
-                        const item = cart[productId];
-                        totalBottles += item.quantity;
-                        
-                        const itemPriceAfterDiscount = calculateItemPrice(item.product, item.quantity);
-                        subTotal += itemPriceAfterDiscount;
-
-                        const itemDiscount = calculateItemDiscount(item.product, item.quantity);
-                        totalDiscount += itemDiscount;
-
-                        if (item.product.isSpecial) {
-                            specialCartItems.push(item);
-                        } else if (item.product.isVinoSale) {
-                            vinoSaleCartItems.push(item);
-                        }
-                    }
-                }
-
-                if (cartIsEmpty) {
+                if (totals.totalBottles === 0) {
                     emptyCartMessage.style.display = 'block';
-                    viewCartButton.classList.remove('cart-highlight'); // Remove highlight if cart is empty
+                    viewCartButton.classList.remove('cart-highlight');
                 } else {
                     emptyCartMessage.style.display = 'none';
-                    viewCartButton.classList.add('cart-highlight'); // Add highlight if cart has items
+                    viewCartButton.classList.add('cart-highlight');
+                    
+                    const midYearSaleCartItems = [];
+                    const vinoSaleCartItems = [];
+                    const otherBeveragesCartItems = [];
+                    
+                    for (const productId in cart) {
+                        const item = cart[productId];
+                        if (item.product.isMidYearSale) {
+                            midYearSaleCartItems.push(item);
+                        } else if (item.product.isVinoSale) {
+                            vinoSaleCartItems.push(item);
+                        } else if (item.product.isOtherBeverage) {
+                            otherBeveragesCartItems.push(item);
+                        }
+                    }
 
-                    // Create and append Special items section
-                    if (specialCartItems.length > 0) {
-                        const specialsSection = document.createElement('div');
-                        specialsSection.classList.add('mb-6', 'p-4', 'bg-purple-50', 'rounded-lg', 'shadow-inner');
-                        specialsSection.innerHTML = '<h3 class="text-xl font-semibold text-purple-800 mb-4">Monthly Wine Specials in Cart</h3>';
-                        specialCartItems.forEach(item => {
-                            const itemPriceAfterDiscount = calculateItemPrice(item.product, item.quantity);
-                            const itemDiscount = calculateItemDiscount(item.product, item.quantity);
+                    // Create and append Mid Year Sale items section
+                    if (midYearSaleCartItems.length > 0) {
+                        const midYearSaleSection = document.createElement('div');
+                        midYearSaleSection.classList.add('mb-6', 'p-4', 'bg-purple-50', 'rounded-lg', 'shadow-inner');
+                        midYearSaleSection.innerHTML = '<h3 class="text-xl font-semibold text-purple-800 mb-4">Mid Year Sale Items in Cart</h3>';
+                        midYearSaleCartItems.forEach(item => {
                             const cartItemDiv = document.createElement('div');
                             cartItemDiv.classList.add('cart-item');
                             cartItemDiv.innerHTML = `
@@ -1589,10 +1641,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                                 <div class="cart-item-details">
                                     <h4>${item.product.name}</h4>
                                     <p>Brand: ${item.product.brand}</p>
-                                    <p>Grape: ${item.product.grapeVariety || 'N/A'}</p>
-                                    <p>Unit Price (Original): FJ$${item.product.price.toFixed(2)}</p>
-                                    ${itemDiscount > 0 ? `<p class="text-red-600 font-semibold">Discount: -FJ$${itemDiscount.toFixed(2)}</p>` : ''}
-                                    <p class="font-bold">Subtotal: FJ$${itemPriceAfterDiscount.toFixed(2)}</p>
+                                    <p>Unit Price: FJ$${item.product.price.toFixed(2)}</p>
                                 </div>
                                 <div class="cart-item-controls">
                                     <div class="quantity-control">
@@ -1603,9 +1652,38 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                                     <button class="remove-from-cart" data-product-id="${item.product.id}">Remove</button>
                                 </div>
                             `;
-                            specialsSection.appendChild(cartItemDiv);
+                            midYearSaleSection.appendChild(cartItemDiv);
                         });
-                        cartItemsContainer.appendChild(specialsSection);
+                        cartItemsContainer.appendChild(midYearSaleSection);
+                    }
+                    
+                     // Create and append Other Beverages items section
+                    if (otherBeveragesCartItems.length > 0) {
+                        const otherBeveragesSection = document.createElement('div');
+                        otherBeveragesSection.classList.add('mb-6', 'p-4', 'bg-green-50', 'rounded-lg', 'shadow-inner');
+                        otherBeveragesSection.innerHTML = '<h3 class="text-xl font-semibold text-green-800 mb-4">Other Beverages in Cart</h3>';
+                        otherBeveragesCartItems.forEach(item => {
+                            const cartItemDiv = document.createElement('div');
+                            cartItemDiv.classList.add('cart-item');
+                            cartItemDiv.innerHTML = `
+                                <img src="${item.product.image}" alt="${item.product.name}" onerror="this.onerror=null;this.src='https://placehold.co/80x100/cccccc/333333?text=No+Image';" >
+                                <div class="cart-item-details">
+                                    <h4>${item.product.name}</h4>
+                                    <p>Brand: ${item.product.brand}</p>
+                                    <p>Unit Price: FJ$${item.product.price.toFixed(2)}</p>
+                                </div>
+                                <div class="cart-item-controls">
+                                    <div class="quantity-control">
+                                        <button class="decrease-cart-quantity" data-product-id="${item.product.id}">-</button>
+                                        <input type="number" value="${item.quantity}" min="1" class="cart-quantity-input" data-product-id="${item.product.id}" readonly>
+                                        <button class="increase-cart-quantity" data-product-id="${item.product.id}">+</button>
+                                    </div>
+                                    <button class="remove-from-cart" data-product-id="${item.product.id}">Remove</button>
+                                </div>
+                            `;
+                            otherBeveragesSection.appendChild(cartItemDiv);
+                        });
+                        cartItemsContainer.appendChild(otherBeveragesSection);
                     }
 
                     // Create and append Vino Sale items section
@@ -1614,8 +1692,6 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                         vinoSaleSection.classList.add('mb-6', 'p-4', 'bg-red-50', 'rounded-lg', 'shadow-inner');
                         vinoSaleSection.innerHTML = '<h3 class="text-xl font-semibold text-red-800 mb-4">Vino Sale Items in Cart</h3>';
                         vinoSaleCartItems.forEach(item => {
-                            const itemPriceAfterDiscount = calculateItemPrice(item.product, item.quantity);
-                            const itemDiscount = calculateItemDiscount(item.product, item.quantity);
                             const cartItemDiv = document.createElement('div');
                             cartItemDiv.classList.add('cart-item');
                             cartItemDiv.innerHTML = `
@@ -1623,10 +1699,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                                 <div class="cart-item-details">
                                     <h4>${item.product.name}</h4>
                                     <p>Brand: ${item.product.brand}</p>
-                                    <p>Grape: ${item.product.grapeVariety || 'N/A'}</p>
-                                    <p>Unit Price (Original): FJ$${item.product.price.toFixed(2)}</p>
-                                    ${itemDiscount > 0 ? `<p class="text-red-600 font-semibold">Discount: -FJ$${itemDiscount.toFixed(2)}</p>` : ''}
-                                    <p class="font-bold">Subtotal: FJ$${itemPriceAfterDiscount.toFixed(2)}</p>
+                                    <p>Unit Price: FJ$${item.product.price.toFixed(2)}</p>
                                 </div>
                                 <div class="cart-item-controls">
                                     <div class="quantity-control">
@@ -1643,22 +1716,18 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                     }
                 }
                 
-                const deliveryFee = (subTotal > 0 && subTotal < 60) ? 5.00 : 0.00;
-                const grandTotal = subTotal + deliveryFee;
+                totalBottlesSpan.textContent = totals.totalBottles;
+                subTotalPriceSpan.textContent = totals.subTotal.toFixed(2);
+                totalDiscountSpan.textContent = totals.totalDiscount.toFixed(2);
+                deliveryFeeSpan.textContent = totals.deliveryFee.toFixed(2);
+                grandTotalPriceSpan.textContent = totals.grandTotal.toFixed(2);
 
-                totalBottlesSpan.textContent = totalBottles;
-                subTotalPriceSpan.textContent = subTotal.toFixed(2);
-                totalDiscountSpan.textContent = totalDiscount.toFixed(2);
-                deliveryFeeSpan.textContent = deliveryFee.toFixed(2);
-                grandTotalPriceSpan.textContent = grandTotal.toFixed(2);
-
-
-                if (totalBottles >= 1) {
+                if (totals.totalBottles >= 1) {
                     placeOrderButton.disabled = false;
                 } else {
                     placeOrderButton.disabled = true;
                 }
-                cartItemCountSpan.textContent = totalBottles;
+                cartItemCountSpan.textContent = totals.totalBottles;
             }
 
             // Attach event listeners for adding/removing items and quantity changes
@@ -1682,10 +1751,12 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                         const quantity = parseInt(quantityInput.value);
 
                         let productToAdd;
-                        if (productOrigin === 'special') {
-                            productToAdd = products.find(p => p.id === productId);
+                        if (productOrigin === 'mid-year-sale') {
+                            productToAdd = midYearSaleProducts.find(p => p.id === productId);
                         } else if (productOrigin === 'vino-sale') {
                             productToAdd = vinoSaleProducts.find(p => p.id === productId);
+                        } else if (productOrigin === 'other-beverage') {
+                            productToAdd = otherBeveragesProducts.find(p => p.id === productId);
                         }
                         
                         if (productToAdd && quantity > 0) {
@@ -1761,44 +1832,56 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 orderDateSpan.textContent = new Date().toLocaleDateString();
                 orderItemsTableBody.innerHTML = '';
 
-                let totalItems = 0;
-                let subTotal = 0;
-                let totalDiscount = 0;
-
-                const specialOrderItems = [];
+                const totals = calculateCartTotals(cart);
+                
+                const midYearSaleOrderItems = [];
                 const vinoSaleOrderItems = [];
+                const otherBeveragesOrderItems = [];
 
                 for (const productId in cart) {
                     if (cart.hasOwnProperty(productId)) {
                         const item = cart[productId];
-                        if (item.product.isSpecial) {
-                            specialOrderItems.push(item);
+                        if (item.product.isMidYearSale) {
+                            midYearSaleOrderItems.push(item);
                         } else if (item.product.isVinoSale) {
                             vinoSaleOrderItems.push(item);
+                        } else if (item.product.isOtherBeverage) {
+                            otherBeveragesOrderItems.push(item);
                         }
                     }
                 }
 
-                // Add Monthly Specials section to the order table
-                if (specialOrderItems.length > 0) {
-                    const specialsHeaderRow = document.createElement('tr');
-                    specialsHeaderRow.innerHTML = '<th colspan="5" class="text-left py-2 bg-purple-100 text-purple-800">Monthly Wine Specials</th>';
-                    orderItemsTableBody.appendChild(specialsHeaderRow);
-                    specialOrderItems.forEach(item => {
-                        const subtotalPrice = calculateItemPrice(item.product, item.quantity);
-                        const itemDiscount = calculateItemDiscount(item.product, item.quantity);
-
-                        totalItems += item.quantity;
-                        subTotal += subtotalPrice;
-                        totalDiscount += itemDiscount;
-
+                // Add Mid Year Sale section to the order table
+                if (midYearSaleOrderItems.length > 0) {
+                    const midYearSaleHeaderRow = document.createElement('tr');
+                    midYearSaleHeaderRow.innerHTML = '<th colspan="5" class="text-left py-2 bg-purple-100 text-purple-800">Mid Year Sale Items</th>';
+                    orderItemsTableBody.appendChild(midYearSaleHeaderRow);
+                    midYearSaleOrderItems.forEach(item => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${item.product.name} <br><small class="text-gray-500">${item.product.brand}, ${item.product.grapeVariety || 'N/A'}</small></td>
                             <td class="text-right">${item.quantity}</td>
                             <td class="text-right">FJ$${item.product.price.toFixed(2)}</td>
-                            <td class="text-right text-red-600">${itemDiscount > 0 ? `-FJ$${itemDiscount.toFixed(2)}` : 'FJ$0.00'}</td>
-                            <td class="text-right">FJ$${subtotalPrice.toFixed(2)}</td>
+                            <td class="text-right">-</td>
+                            <td class="text-right">-</td>
+                        `;
+                        orderItemsTableBody.appendChild(row);
+                    });
+                }
+                
+                // Add Other Beverages section to the order table
+                if (otherBeveragesOrderItems.length > 0) {
+                    const otherBeveragesHeaderRow = document.createElement('tr');
+                    otherBeveragesHeaderRow.innerHTML = '<th colspan="5" class="text-left py-2 bg-green-100 text-green-800">Other Beverages</th>';
+                    orderItemsTableBody.appendChild(otherBeveragesHeaderRow);
+                    otherBeveragesOrderItems.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.product.name} <br><small class="text-gray-500">${item.product.brand}, ${item.product.grapeVariety || 'N/A'}</small></td>
+                            <td class="text-right">${item.quantity}</td>
+                            <td class="text-right">FJ$${item.product.price.toFixed(2)}</td>
+                            <td class="text-right">-</td>
+                            <td class="text-right">-</td>
                         `;
                         orderItemsTableBody.appendChild(row);
                     });
@@ -1810,12 +1893,8 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                     vinoSaleHeaderRow.innerHTML = '<th colspan="5" class="text-left py-2 bg-red-100 text-red-800">Vino Sale Items</th>';
                     orderItemsTableBody.appendChild(vinoSaleHeaderRow);
                     vinoSaleOrderItems.forEach(item => {
-                        const subtotalPrice = calculateItemPrice(item.product, item.quantity);
-                        const itemDiscount = calculateItemDiscount(item.product, item.quantity);
-
-                        totalItems += item.quantity;
-                        subTotal += subtotalPrice;
-                        totalDiscount += itemDiscount;
+                        const subtotalPrice = calculateVinoSaleItemPrice(item.product, item.quantity);
+                        const itemDiscount = (item.product.price * item.quantity) - subtotalPrice;
 
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -1829,14 +1908,11 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                     });
                 }
 
-                const deliveryFee = (subTotal > 0 && subTotal < 60) ? 5.00 : 0.00;
-                const grandTotal = subTotal + deliveryFee;
-
-                finalTotalBottlesSpan.textContent = totalItems;
-                finalSubTotalPriceSpan.textContent = subTotal.toFixed(2);
-                finalTotalDiscountSpan.textContent = totalDiscount.toFixed(2);
-                finalDeliveryFeeSpan.textContent = deliveryFee.toFixed(2);
-                finalGrandTotalPriceSpan.textContent = grandTotal.toFixed(2);
+                finalTotalBottlesSpan.textContent = totals.totalBottles;
+                finalSubTotalPriceSpan.textContent = totals.subTotal.toFixed(2);
+                finalTotalDiscountSpan.textContent = totals.totalDiscount.toFixed(2);
+                finalDeliveryFeeSpan.textContent = totals.deliveryFee.toFixed(2);
+                finalGrandTotalPriceSpan.textContent = totals.grandTotal.toFixed(2);
             }
 
             // Function to generate order summary text for email (plain text format)
@@ -1861,68 +1937,21 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 if (customerFeedback) orderSummary += `Inquiry/Feedback: ${customerFeedback}\n`;
                 orderSummary += "--------------------------------------------------\n\n";
                 
-
-                let totalItems = 0;
-                let subTotal = 0;
-                let totalDiscount = 0;
-
-                const specialOrderItems = [];
-                const vinoSaleOrderItems = [];
-
-                for (const productId in cart) {
-                    if (cart.hasOwnProperty(productId)) {
-                        const item = cart[productId];
-                        if (item.product.isSpecial) {
-                            specialOrderItems.push(item);
-                        } else if (item.product.isVinoSale) {
-                            vinoSaleOrderItems.push(item);
-                        }
-                    }
-                }
-
                 orderSummary += "Customer Order Summary:\n";
 
-                if (specialOrderItems.length > 0) {
-                    orderSummary += "\n--- Monthly Wine Specials ---\n";
-                    specialOrderItems.forEach(item => {
-                        const subtotalPrice = calculateItemPrice(item.product, item.quantity);
-                        const itemDiscount = calculateItemDiscount(item.product, item.quantity);
-                        totalItems += item.quantity;
-                        subTotal += subtotalPrice;
-                        totalDiscount += itemDiscount;
-                        orderSummary += `- ${item.product.name} (${item.product.brand}, ${item.product.grapeVariety || 'N/A'}) - Qty: ${item.quantity}, Subtotal: FJ$${subtotalPrice.toFixed(2)}`;
-                        if (itemDiscount > 0) {
-                            orderSummary += ` (Discount: -FJ$${itemDiscount.toFixed(2)})`;
-                        }
-                        orderSummary += `\n`;
-                    });
-                }
-
-                if (vinoSaleOrderItems.length > 0) {
-                    orderSummary += "\n--- Vino Sale Items ---\n";
-                    vinoSaleOrderItems.forEach(item => {
-                        const subtotalPrice = calculateItemPrice(item.product, item.quantity);
-                        const itemDiscount = calculateItemDiscount(item.product, item.quantity);
-                        totalItems += item.quantity;
-                        subTotal += subtotalPrice;
-                        totalDiscount += itemDiscount;
-                        orderSummary += `- ${item.product.name} (${item.product.brand}, ${item.product.grapeVariety || 'N/A'}) - Qty: ${item.quantity}, Subtotal: FJ$${subtotalPrice.toFixed(2)}`;
-                        if (itemDiscount > 0) {
-                            orderSummary += ` (Discount: -FJ$${itemDiscount.toFixed(2)})`;
-                        }
-                        orderSummary += `\n`;
-                    });
+                for (const productId in cart) {
+                    const item = cart[productId];
+                    orderSummary += `- ${item.product.name} (${item.product.brand}) - Qty: ${item.quantity}\n`;
                 }
                 
-                const deliveryFee = (subTotal > 0 && subTotal < 60) ? 5.00 : 0.00;
-                const grandTotal = subTotal + deliveryFee;
+                const totals = calculateCartTotals(cart);
 
                 orderSummary += "\n";
-                orderSummary += `Total Bottles: ${totalItems}\n`;
-                orderSummary += `Total Discount: -FJ$${totalDiscount.toFixed(2)}\n`;
-                orderSummary += `Subtotal: FJ$${subTotal.toFixed(2)}\n`;
-                orderSummary += `Delivery Fee: FJ$${deliveryFee.toFixed(2)}\n`;
-                orderSummary += `Grand Total: FJ$${grandTotal.toFixed(2)}\n\n`;
+                orderSummary += `Total Items: ${totals.totalBottles}\n`;
+                orderSummary += `Total Discount: -FJ$${totals.totalDiscount.toFixed(2)}\n`;
+                orderSummary += `Subtotal: FJ$${totals.subTotal.toFixed(2)}\n`;
+                orderSummary += `Delivery Fee: FJ$${totals.deliveryFee.toFixed(2)}\n`;
+                orderSummary += `Grand Total: FJ$${totals.grandTotal.toFixed(2)}\n\n`;
                 
                 return orderSummary;
             }
@@ -1932,7 +1961,7 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
                 orderConfirmationSection.classList.remove('hidden');
                 orderConfirmationSection.classList.add('active');
 
-                document.getElementById('specials').classList.remove('active');
+                document.getElementById('mid-year-sale').classList.remove('active');
                 document.getElementById('vino-sale').classList.remove('active');
                 document.getElementById('cart').classList.remove('active');
                 menuButtons.forEach(btn => btn.classList.remove('active'));
@@ -1978,14 +2007,14 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
             });
 
             // Initial render functions
-            renderSpecialsProducts(); // Render specials by default
+            renderMidYearSaleProducts(); // Render mid year sale by default
             updateCartDisplay();
             attachCartEventListeners();
 
-            // Event listeners for Specials tab filters/search
-            countryFilter.addEventListener('change', renderSpecialsProducts);
-            typeFilter.addEventListener('change', renderSpecialsProducts);
-            brandSearch.addEventListener('input', renderSpecialsProducts);
+            // Event listeners for Mid Year Sale tab filters/search
+            countryFilter.addEventListener('change', renderMidYearSaleProducts);
+            typeFilter.addEventListener('change', renderMidYearSaleProducts);
+            brandSearch.addEventListener('input', renderMidYearSaleProducts);
 
             // Event listeners for Vino Sale tab filters/search
             vinoSaleCountryFilter.addEventListener('change', renderVinoSaleProducts);
@@ -2001,15 +2030,18 @@ WAUGSLIPCM010,Sweet Lips Infusions,Pineapple Coconut & Mexican Lime,NV,Moscato B
 
                     event.target.classList.add('active');
 
-                    if (targetId === 'specials') {
+                    if (targetId === 'mid-year-sale') {
                         document.getElementById(targetId).classList.add('active');
-                        renderSpecialsProducts(); // Re-render specials when tab is clicked
+                        renderMidYearSaleProducts(); 
                     } else if (targetId === 'vino-sale') {
                         document.getElementById(targetId).classList.add('active');
-                        renderVinoSaleProducts(); // Render vino sale products when tab is clicked
+                        renderVinoSaleProducts();
+                    } else if (targetId === 'other-beverages') {
+                        document.getElementById(targetId).classList.add('active');
+                        renderOtherBeveragesProducts();
                     } else if (targetId === 'cart') {
                         document.getElementById(targetId).classList.add('active');
-                        updateCartDisplay(); // Ensure cart is up-to-date
+                        updateCartDisplay();
                     }
 
 
