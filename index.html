@@ -459,30 +459,16 @@
   </div>
 
   <script>
-    // ═══════════════════════════════════════════════════════
-    // EMAIL CONFIGURATION
-    // ═══════════════════════════════════════════════════════
-    // Edit these email addresses for customer confirmation emails
     
     const EMAIL_CONFIG = {
       to: 'indulgelami@lawhillfiji.com',           // Primary recipient
       cc: 'graphics@lawhillfiji.com,marketing@lawhillfiji.com',  // CC recipients (comma-separated, no spaces)
-      // You can also leave cc empty if not needed: cc: ''
+      
     };
     
-    // ═══════════════════════════════════════════════════════
-    // GOOGLE SHEETS WEB APP URL
-    // ═══════════════════════════════════════════════════════
-    // INSTRUCTIONS: 
-    // 1. Go to your Google Sheet
-    // 2. Click Extensions → Apps Script
-    // 3. Paste the code from google-apps-script.js
-    // 4. Deploy → New deployment → Web app
-    // 5. Set "Who has access" to "Anyone"
-    // 6. Copy the deployment URL and paste it below
     
     const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycby3BAaUA9UcFhpNRawKM2TylNXsMpfRuCxa7qE2rgmsyvXIapdLBvfBI5qWTnh8Y3p98g/exec";
-    // Example: "https://script.google.com/macros/s/AKfycbw_YOURCODE_HERE/exec"
+  
 
     // =========================
     // Product Catalog
@@ -702,7 +688,7 @@
     let cart = [];
 
     function renderProducts() {
-      // Render Specials (12 wines)
+      // Render Specials
       const specialsGrid = document.getElementById("valentines-grid");
       specialsGrid.innerHTML = products.specials.map((p, i) => `
         <div class="product-card text-center" style="--i: ${i}">
@@ -716,7 +702,7 @@
         </div>
       `).join("");
 
-      // Render Hampers (9 hampers with full details)
+      // Render Hampers
       const hampersGrid = document.getElementById("hampers-grid");
       hampersGrid.innerHTML = products.hampers.map((p, i) => `
         <div class="product-card" style="--i: ${i}">
@@ -1106,3 +1092,4 @@
   </script>
 </body>
 </html>
+
